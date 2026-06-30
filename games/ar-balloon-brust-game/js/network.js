@@ -168,7 +168,13 @@ function handleOpponentDisconnect() {
 
 function leaveCurrentRoom() {
   if (networkConnection) {
-    networkConnection.send({ type: "disconnect" });
+    if (networkConnection.open) {
+      try {
+        networkConnection.send({ type: "disconnect" });
+      } catch (err) {
+        console.warn("Failed to send disconnect message:", err);
+      }
+    }
     networkConnection.close();
     networkConnection = null;
   }

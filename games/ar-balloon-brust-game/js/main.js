@@ -426,10 +426,12 @@ retryGameBtn.addEventListener("click", () => {
   if (isMultiplayer) {
     if (myPlayerRole === "host") {
       randomSeed = Math.floor(Math.random() * 1000000);
-      networkConnection.send({
-        type: "restart",
-        seed: randomSeed
-      });
+      if (networkConnection && networkConnection.open) {
+        networkConnection.send({
+          type: "restart",
+          seed: randomSeed
+        });
+      }
       startGameplay();
     } else {
       showTemporaryToast("ต้องรอให้หัวหน้าห้องทำการรีเซ็ตระบบท้าประลอง...");
@@ -444,10 +446,12 @@ quickRestartBtn.addEventListener("click", () => {
   if (isMultiplayer) {
     if (myPlayerRole === "host") {
       randomSeed = Math.floor(Math.random() * 1000000);
-      networkConnection.send({
-        type: "restart",
-        seed: randomSeed
-      });
+      if (networkConnection && networkConnection.open) {
+        networkConnection.send({
+          type: "restart",
+          seed: randomSeed
+        });
+      }
       startGameplay();
     } else {
       showTemporaryToast("ต้องรอให้หัวหน้าห้องสั่งเริ่มใหม่เท่านั้น!");
@@ -502,7 +506,9 @@ document.getElementById("guestConfirmStartBtn").addEventListener("click", () => 
 
   switchPlayMode(gameMode).then(() => {
     localInputReady = true;
-    networkConnection.send({ type: "ready" });
+    if (networkConnection && networkConnection.open) {
+      networkConnection.send({ type: "ready" });
+    }
     if (opponentInputReady) {
       triggerCountdown();
     } else {
@@ -512,7 +518,9 @@ document.getElementById("guestConfirmStartBtn").addEventListener("click", () => 
     }
   }).catch(() => {
     localInputReady = true;
-    networkConnection.send({ type: "ready" });
+    if (networkConnection && networkConnection.open) {
+      networkConnection.send({ type: "ready" });
+    }
     if (opponentInputReady) {
       triggerCountdown();
     } else {
