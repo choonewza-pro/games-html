@@ -12,24 +12,55 @@
     body { font-family: 'Kanit', sans-serif; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen flex items-center justify-center p-6">
-  <div class="max-w-2xl w-full">
-    <h1 class="text-5xl font-extrabold text-center text-white mb-2 drop-shadow-lg">🎮 Game Menu</h1>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
+  <div class="min-h-screen flex flex-col items-center justify-center p-6">
+    <h1 class="text-5xl font-extrabold text-center text-white mb-2 drop-shadow-lg">Game Menu</h1>
     <p class="text-center text-purple-200 mb-10 text-lg">เลือกเกมที่คุณต้องการเล่น</p>
 
-    <div class="grid gap-6">
-      <a href="games/ar_balloon_burst_game_v1.html"
-         class="block p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
-        <h2 class="text-2xl font-bold text-white">🎈 Balloon Burst v1</h2>
-        <p class="text-purple-200 mt-2">คำประวิสรรชนีย์ และคำไม่ประวิสรรชนีย์ Challenge — ใช้มือเป่าลูกโป่งกับกล้อง</p>
-      </a>
-
-      <a href="games/ar_balloon_burst_game_v2.html"
-         class="block p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
-        <h2 class="text-2xl font-bold text-white">🎈 Balloon Burst v2</h2>
-        <p class="text-purple-200 mt-2">Online Multiplayer Challenge — เป่าลูกโป่งออนไลน์กับเพื่อน</p>
-      </a>
+    <div id="game-list" class="grid gap-6 w-full max-w-2xl">
+      <div class="text-center text-purple-300 text-xl">กำลังโหลดเกม...</div>
     </div>
   </div>
+
+  <script>
+    async function loadGames() {
+      const container = document.getElementById('game-list');
+      try {
+        const res = await fetch('https://api.github.com/repos/choonewza-pro/games-html/contents/games');
+        if (!res.ok) throw new Error('API error');
+        const files = await res.json();
+        const htmlFiles = files.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
+
+        if (htmlFiles.length === 0) {
+          container.innerHTML = '<div class="text-center text-purple-300 text-xl">ไม่มีเกมในขณะนี้</div>';
+          return;
+        }
+
+        const cards = await Promise.all(htmlFiles.map(async (file) => {
+          let title = file.name.replace(/\.html$/, '').replace(/_/g, ' ');
+          try {
+            const fileRes = await fetch(file.download_url);
+            const text = await fileRes.text();
+            const match = text.match(/<title>([^<]+)<\/title>/);
+            if (match) title = match[1];
+          } catch {}
+
+          const emoji = title.toLowerCase().includes('v2') ? '🎮' : '🎈';
+          return `
+            <a href="${file.path}"
+               class="block p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
+              <h2 class="text-2xl font-bold text-white">${emoji} ${title}</h2>
+              <p class="text-purple-200 mt-2">${file.path}</p>
+            </a>
+          `;
+        }));
+
+        container.innerHTML = cards.join('');
+      } catch (err) {
+        container.innerHTML = '<div class="text-center text-purple-300 text-xl">ไม่สามารถโหลดรายชื่อเกมได้</div>';
+      }
+    }
+    loadGames();
+  </script>
 </body>
 </html>
