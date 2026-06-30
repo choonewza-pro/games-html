@@ -53,59 +53,10 @@
   </header>
 
   <!-- Main Game Workspace Area -->
-  <main class="flex-grow flex flex-col lg:flex-row items-center justify-center p-4 gap-6 max-w-7xl mx-auto w-full">
+  <main class="flex-grow flex flex-col items-center justify-center p-4 gap-6 max-w-5xl mx-auto w-full">
     
-    <!-- Left Panel: Gameplay Instructions & Controls -->
-    <div class="w-full lg:w-1/4 flex flex-col gap-4 self-stretch justify-between">
-      <div class="bg-white p-5 rounded-3xl border-4 border-sky-300 shadow-xl flex-grow flex flex-col justify-between">
-        <div>
-          <span class="bg-sky-100 text-sky-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ภารกิจการเรียนรู้</span>
-          <h2 class="text-xl font-bold mt-2 text-slate-700">ภารกิจพิชิตลูกโป่ง 🎈</h2>
-          <p id="missionDescription" class="text-sm text-slate-500 mt-2 leading-relaxed">
-            จงใช้ <span class="text-rose-500 font-bold">"นิ้วชี้"</span> ของคุณผ่านกล้อง หรือใช้ <span class="text-sky-500 font-bold">"นิ้วแตะหน้าจอ/เมาส์"</span> แตะเฉพาะลูกโป่งที่เป็น 
-            <span class="bg-rose-100 text-rose-600 px-2 py-0.5 rounded-md font-bold">คำประวิสรรชนีย์ (มีรูป ะ)</span> เท่านั้น!
-          </p>
-          
-          <div class="mt-4 border-t border-slate-100 pt-3">
-            <h3 id="correctLabel" class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">ตัวอย่างคำประวิสรรชนีย์ (+10 คะแนน)</h3>
-            <div id="correctExamplesContainer" class="flex flex-wrap gap-1.5">
-              <span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">มะม่วง</span>
-              <span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">กะทิ</span>
-              <span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">สะอาด</span>
-              <span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">ตะกร้า</span>
-            </div>
-          </div>
-
-          <div class="mt-3">
-            <h3 id="incorrectLabel" class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">ตัวอย่างคำไม่ประวิสรรชนีย์ (-5 คะแนน)</h3>
-            <div id="incorrectExamplesContainer" class="flex flex-wrap gap-1.5">
-              <span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">ตลาด</span>
-              <span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">ขนม</span>
-              <span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">ถนน</span>
-              <span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">ฉลาด</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 border-t border-slate-100 pt-4">
-          <div id="roomStatusPanel" class="hidden bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800 space-y-1.5">
-            <div class="font-bold flex items-center gap-1.5 text-indigo-900">
-              <i class="fa-solid fa-circle-nodes animate-pulse"></i> <span>สถานะห้องเชื่อมต่อ:</span>
-            </div>
-            <p>บทบาท: <span id="localRoleBadge" class="font-black text-indigo-600">กำลังดาวน์โหลด...</span></p>
-            <p>รหัสห้อง: <span id="localRoomIdBadge" class="font-black text-indigo-600">-</span></p>
-            <p>กติกา: <span id="localMatchModeBadge" class="font-black text-indigo-600">แย่งกันเจาะ</span></p>
-          </div>
-          <div id="tipPanel" class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs text-slate-500 flex items-center gap-2 mt-2">
-            <i class="fa-solid fa-lightbulb text-amber-500 text-base animate-pulse"></i>
-            <span>เคล็ดลับ: ปลายนิ้วชี้จะมีวงแหวนเรืองแสง คอยส่องเป้าหมายในการเจาะลูกโป่ง!</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Center: Interactive Game Board & Camera Viewport -->
-    <div class="w-full lg:w-3/4 flex flex-col gap-4 items-center">
+    <div class="w-full flex flex-col gap-4 items-center">
       
       <!-- AR Viewport Wrapper -->
       <div id="gameContainerWrapper" class="relative w-full aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl flex items-center justify-center">
@@ -557,6 +508,15 @@
   <footer class="w-full text-center py-4 text-[11px] text-sky-500 border-t border-sky-100/50 bg-white/50">
     <p>© 2026 Balloon Burst: AR Interactive Educational Game. พัฒนาขึ้นเพื่อการเรียนรู้แบบมีปฏิสัมพันธ์ออนไลน์</p>
   </footer>
+
+  <!-- Hidden elements to prevent legacy JS crashes -->
+  <div class="hidden">
+    <span id="localRoleBadge"></span>
+    <span id="localRoomIdBadge"></span>
+    <span id="localMatchModeBadge"></span>
+    <div id="correctExamplesContainer"></div>
+    <div id="incorrectExamplesContainer"></div>
+  </div>
 
   <!-- Game Scripts in Clean Architecture Modules -->
   <script src="js/state.js"></script>
