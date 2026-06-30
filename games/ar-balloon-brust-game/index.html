@@ -404,6 +404,95 @@
         <div id="comboFeedback" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 px-4 py-2 rounded-full font-black text-sm z-10 shadow-lg tracking-wider animate-bounce">
           เยี่ยมเลย! +10
         </div>
+
+        <!-- Word Settings Modal Dialog (Moved inside wrapper for fullscreen visibility) -->
+        <div id="wordSettingsModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col justify-center items-center p-4 z-45 overflow-y-auto">
+          <div class="bg-white max-w-lg w-full rounded-3xl border-4 border-sky-400 p-6 shadow-2xl relative my-auto">
+            <button id="closeWordSettingsModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+              <i class="fa-solid fa-circle-xmark text-2xl"></i>
+            </button>
+
+            <h3 class="text-xl font-black text-sky-600 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-gear"></i> ตั้งค่าคำศัพท์และกติกาด้วยตนเอง
+            </h3>
+
+            <div class="space-y-3 text-sm text-slate-600 max-h-[45vh] overflow-y-auto pr-2">
+              <div>
+                <label class="block text-xs font-bold text-sky-600 mb-1">
+                  เลือกเทมเพลตชุดคำศัพท์ (Select Template):
+                </label>
+                <select id="templateSelect" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none bg-white font-semibold text-slate-700">
+                  <option value="">-- เลือกเทมเพลตชุดคำศัพท์ --</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2">
+                <div class="col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                    หัวข้อคำท้าทาย (Game Subtitle):
+                  </label>
+                  <input id="gameTitleInput" type="text" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                    เวลาเล่น (วิ):
+                  </label>
+                  <input id="gameDurationInput" type="number" min="10" max="300" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none font-bold text-slate-700">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                    ความเร็ว (1-10):
+                  </label>
+                  <input id="gameSpeedInput" type="number" min="1" max="10" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none font-bold text-slate-700">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                  คำอธิบายภารกิจสั้นๆ (Mission Description):
+                </label>
+                <textarea id="gameMissionInput" rows="1" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none resize-none"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                    ชื่อหมวดหมู่ที่ถูก:
+                  </label>
+                  <input id="correctCatInput" type="text" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                    ชื่อหมวดหมู่ที่ผิด:
+                  </label>
+                  <input id="incorrectCatInput" type="text" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                  คำที่ถูกต้อง (คะแนนบวก):
+                </label>
+                <textarea id="praWordsInput" rows="1.5" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none resize-none"></textarea>
+                <p class="text-[8px] text-slate-400 mt-0.5">แยกแต่ละคำด้วยเครื่องหมายจุลภาค ( , )</p>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 mb-1">
+                  คำที่ผิด (คะแนนลบ):
+                </label>
+                <textarea id="nonPraWordsInput" rows="1.5" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none resize-none"></textarea>
+                <p class="text-[8px] text-slate-400 mt-0.5">แยกแต่ละคำด้วยเครื่องหมายจุลภาค ( , )</p>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-3">
+              <button id="saveWordSettingsBtn" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-base rounded-xl transition shadow-md">
+                บันทึกการตั้งค่า
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -460,94 +549,7 @@
     </div>
   </div>
 
-  <!-- Word Settings Modal Dialog -->
-  <div id="wordSettingsModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white max-w-lg w-full rounded-3xl border-4 border-sky-400 p-6 shadow-2xl relative">
-      <button id="closeWordSettingsModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-        <i class="fa-solid fa-circle-xmark text-2xl"></i>
-      </button>
 
-      <h3 class="text-2xl font-black text-sky-600 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-gear"></i> ตั้งค่าคำศัพท์และกติกาด้วยตนเอง
-      </h3>
-
-      <div class="space-y-4 text-sm text-slate-600 max-h-[60vh] overflow-y-auto pr-2">
-        <div>
-          <label class="block text-xs font-bold text-sky-600 mb-1">
-            เลือกเทมเพลตชุดคำศัพท์ (Select Template):
-          </label>
-          <select id="templateSelect" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none bg-white font-semibold text-slate-700">
-            <option value="">-- เลือกเทมเพลตชุดคำศัพท์ --</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-4 gap-3">
-          <div class="col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">
-              หัวข้อคำท้าทาย (Game Subtitle):
-            </label>
-            <input id="gameTitleInput" type="text" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">
-              เวลาเล่น (วิ):
-            </label>
-            <input id="gameDurationInput" type="number" min="10" max="300" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none font-bold text-slate-700">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">
-              ความเร็ว (1-10):
-            </label>
-            <input id="gameSpeedInput" type="number" min="1" max="10" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none font-bold text-slate-700">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">
-            คำอธิบายภารกิจสั้นๆ (Mission Description):
-          </label>
-          <textarea id="gameMissionInput" rows="2" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none resize-none"></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">
-              ชื่อหมวดหมู่ที่ถูก:
-            </label>
-            <input id="correctCatInput" type="text" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">
-              ชื่อหมวดหมู่ที่ผิด:
-            </label>
-            <input id="incorrectCatInput" type="text" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">
-            คำที่ถูกต้อง (คะแนนบวก):
-          </label>
-          <textarea id="praWordsInput" rows="2" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none resize-none"></textarea>
-          <p class="text-[9px] text-slate-400 mt-0.5">แยกแต่ละคำด้วยเครื่องหมายจุลภาค ( , )</p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">
-            คำที่ผิด (คะแนนลบ):
-          </label>
-          <textarea id="nonPraWordsInput" rows="2" class="w-full p-2.5 border-2 border-sky-100 rounded-2xl text-sm focus:border-sky-400 focus:outline-none resize-none"></textarea>
-          <p class="text-[9px] text-slate-400 mt-0.5">แยกแต่ละคำด้วยเครื่องหมายจุลภาค ( , )</p>
-        </div>
-      </div>
-
-      <div class="mt-6 flex gap-3">
-        <button id="saveWordSettingsBtn" class="flex-grow py-3 bg-sky-500 hover:bg-sky-600 text-white font-extrabold rounded-2xl transition shadow-md">
-          บันทึกการตั้งค่า
-        </button>
-      </div>
-    </div>
-  </div>
 
 
 
