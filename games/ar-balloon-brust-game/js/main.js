@@ -687,6 +687,7 @@ startMultiplayerGameBtn.addEventListener("click", () => {
     localInputReady = false;
     opponentInputReady = false;
 
+    showTemporaryToast("[Debug] Host sending pre_start...");
     networkConnection.send({
       type: "pre_start",
       seed: randomSeed,

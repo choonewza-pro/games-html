@@ -34,6 +34,10 @@ function setupConnectionListeners() {
       // Update heartbeat timestamp on any message received
       lastOpponentHeartbeatTime = Date.now();
 
+      if (data.type !== "ping" && data.type !== "pointer") {
+        showTemporaryToast("[Debug] Received: " + data.type);
+      }
+
       switch (data.type) {
         case "ping":
           // Heartbeat ping received, just update the timestamp (already done above)
