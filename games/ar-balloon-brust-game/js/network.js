@@ -30,142 +30,147 @@ function setupConnectionListeners() {
   }, 2000);
 
   networkConnection.on("data", (data) => {
-    // Update heartbeat timestamp on any message received
-    lastOpponentHeartbeatTime = Date.now();
+    try {
+      // Update heartbeat timestamp on any message received
+      lastOpponentHeartbeatTime = Date.now();
 
-    switch (data.type) {
-      case "ping":
-        // Heartbeat ping received, just update the timestamp (already done above)
-        break;
-      case "init":
-        GAME_TITLE = data.settings.title;
-        GAME_MISSION = data.settings.mission;
-        CORRECT_CAT_NAME = data.settings.correctCatName;
-        INCORRECT_CAT_NAME = data.settings.incorrectCatName;
-        PRA_WORDS = data.settings.praWords;
-        NON_PRA_WORDS = data.settings.nonPraWords;
-        gameDuration = data.settings.duration;
-        gameSpeed = data.settings.speed;
-        randomSeed = data.seed;
-        matchMode = data.matchMode || "share";
-        updateGameUI();
-        updateMatchModeUI();
-        break;
+      switch (data.type) {
+        case "ping":
+          // Heartbeat ping received, just update the timestamp (already done above)
+          break;
+        case "init":
+          GAME_TITLE = data.settings.title;
+          GAME_MISSION = data.settings.mission;
+          CORRECT_CAT_NAME = data.settings.correctCatName;
+          INCORRECT_CAT_NAME = data.settings.incorrectCatName;
+          PRA_WORDS = data.settings.praWords;
+          NON_PRA_WORDS = data.settings.nonPraWords;
+          gameDuration = data.settings.duration;
+          gameSpeed = data.settings.speed;
+          randomSeed = data.seed;
+          matchMode = data.matchMode || "share";
+          updateGameUI();
+          updateMatchModeUI();
+          break;
 
-      case "settings":
-        GAME_TITLE = data.settings.title;
-        GAME_MISSION = data.settings.mission;
-        CORRECT_CAT_NAME = data.settings.correctCatName;
-        INCORRECT_CAT_NAME = data.settings.incorrectCatName;
-        PRA_WORDS = data.settings.praWords;
-        NON_PRA_WORDS = data.settings.nonPraWords;
-        gameDuration = data.settings.duration;
-        gameSpeed = data.settings.speed;
-        updateGameUI();
-        break;
+        case "settings":
+          GAME_TITLE = data.settings.title;
+          GAME_MISSION = data.settings.mission;
+          CORRECT_CAT_NAME = data.settings.correctCatName;
+          INCORRECT_CAT_NAME = data.settings.incorrectCatName;
+          PRA_WORDS = data.settings.praWords;
+          NON_PRA_WORDS = data.settings.nonPraWords;
+          gameDuration = data.settings.duration;
+          gameSpeed = data.settings.speed;
+          updateGameUI();
+          break;
 
-      case "matchModeChange":
-        // Host changed match mode in lobby
-        matchMode = data.mode;
-        updateMatchModeUI();
-        showTemporaryToast("หัวหน้าห้องเปลี่ยนกติกาการแข่งเป็น: " + (matchMode === "share" ? "แย่งกันเจาะ" : "ต่างคนต่างเจาะ"));
-        break;
+        case "matchModeChange":
+          // Host changed match mode in lobby
+          matchMode = data.mode;
+          updateMatchModeUI();
+          showTemporaryToast("หัวหน้าห้องเปลี่ยนกติกาการแข่งเป็น: " + (matchMode === "share" ? "แย่งกันเจาะ" : "ต่างคนต่างเจาะ"));
+          break;
 
-      case "pre_start":
-        randomSeed = data.seed;
-        matchMode = data.matchMode || "share";
-        gameMode = data.gameMode || "ai";
-        isMultiplayer = true;
-        
-        const myScoreLabelEl = document.getElementById("myScoreLabel");
-        if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
-        
-        const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
-        if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
-        
-        localInputReady = false;
-        opponentInputReady = false;
+        case "pre_start":
+          randomSeed = data.seed;
+          matchMode = data.matchMode || "share";
+          gameMode = data.gameMode || "ai";
+          isMultiplayer = true;
+          
+          const myScoreLabelEl = document.getElementById("myScoreLabel");
+          if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
+          
+          const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
+          if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
+          
+          localInputReady = false;
+          opponentInputReady = false;
 
-        const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
-        if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.remove("hidden");
-        
-        const startScreenOverlayEl = document.getElementById("startScreenOverlay");
-        if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
-        break;
+          const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+          if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.remove("hidden");
+          
+          const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+          if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
+          break;
 
-      case "ready":
-        opponentInputReady = true;
-        if (localInputReady) {
-          triggerCountdown();
-        }
-        break;
-
-      case "pointer":
-        opponentTargetPointer.x = data.x;
-        opponentTargetPointer.y = data.y;
-        if (!opponentPointer.active && data.active) {
-          opponentPointer.x = data.x;
-          opponentPointer.y = data.y;
-        }
-        opponentPointer.active = data.active;
-        break;
-
-      case "pop":
-        // Only relevant in "share" mode
-        if (matchMode === "share") {
-          const poppedBalloon = balloons.find(b => b.id === data.id);
-          if (poppedBalloon && !poppedBalloon.popped) {
-            poppedBalloon.popped = true;
-            poppedBalloon.poppedByOpponent = true;
-            
-            createExplosion(poppedBalloon.x, poppedBalloon.y, "#06b6d4"); 
-            playSynthSound('popOpponent');
-            createTextParticle(poppedBalloon.x, poppedBalloon.y, `คู่แข่งเจาะ!`, "#06b6d4", false);
+        case "ready":
+          opponentInputReady = true;
+          if (localInputReady) {
+            triggerCountdown();
           }
-        }
-        break;
+          break;
 
-      case "score":
-        opponentScore = data.score;
-        opponentCombo = data.combo;
-        if (opponentCombo > opponentMaxCombo) {
-          opponentMaxCombo = opponentCombo;
-        }
-        
-        const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
-        if (opponentScoreDisplayEl) {
-          if (opponentScore < 0) {
-            opponentScoreDisplayEl.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
-          } else {
-            opponentScoreDisplayEl.innerText = opponentScore.toString().padStart(3, '0');
+        case "pointer":
+          opponentTargetPointer.x = data.x;
+          opponentTargetPointer.y = data.y;
+          if (!opponentPointer.active && data.active) {
+            opponentPointer.x = data.x;
+            opponentPointer.y = data.y;
           }
-        }
-        
-        const opponentHudComboEl = document.getElementById("opponentHudCombo");
-        if (opponentHudComboEl) {
-          if (opponentCombo >= 3) {
-            opponentHudComboEl.innerText = `COMBO x${opponentCombo}`;
-            opponentHudComboEl.classList.remove("hidden");
-          } else {
-            opponentHudComboEl.classList.add("hidden");
+          opponentPointer.active = data.active;
+          break;
+
+        case "pop":
+          // Only relevant in "share" mode
+          if (matchMode === "share") {
+            const poppedBalloon = balloons.find(b => b.id === data.id);
+            if (poppedBalloon && !poppedBalloon.popped) {
+              poppedBalloon.popped = true;
+              poppedBalloon.poppedByOpponent = true;
+              
+              createExplosion(poppedBalloon.x, poppedBalloon.y, "#06b6d4"); 
+              playSynthSound('popOpponent');
+              createTextParticle(poppedBalloon.x, poppedBalloon.y, `คู่แข่งเจาะ!`, "#06b6d4", false);
+            }
           }
-        }
-        break;
+          break;
 
-      case "restart":
-        randomSeed = data.seed;
-        startGameplay();
-        showTemporaryToast("หัวหน้าห้องสั่งเริ่มเกมรอบใหม่!");
-        break;
+        case "score":
+          opponentScore = data.score;
+          opponentCombo = data.combo;
+          if (opponentCombo > opponentMaxCombo) {
+            opponentMaxCombo = opponentCombo;
+          }
+          
+          const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
+          if (opponentScoreDisplayEl) {
+            if (opponentScore < 0) {
+              opponentScoreDisplayEl.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
+            } else {
+              opponentScoreDisplayEl.innerText = opponentScore.toString().padStart(3, '0');
+            }
+          }
+          
+          const opponentHudComboEl = document.getElementById("opponentHudCombo");
+          if (opponentHudComboEl) {
+            if (opponentCombo >= 3) {
+              opponentHudComboEl.innerText = `COMBO x${opponentCombo}`;
+              opponentHudComboEl.classList.remove("hidden");
+            } else {
+              opponentHudComboEl.classList.add("hidden");
+            }
+          }
+          break;
 
-      case "disconnect":
-        handleOpponentDisconnect();
-        break;
+        case "restart":
+          randomSeed = data.seed;
+          startGameplay();
+          showTemporaryToast("หัวหน้าห้องสั่งเริ่มเกมรอบใหม่!");
+          break;
 
-      case "exit-to-lobby":
-        exitToLobby();
-        showTemporaryToast("คู่แข่งได้กดออกจากเกมกลับสู่ห้องล็อบบี้");
-        break;
+        case "disconnect":
+          handleOpponentDisconnect();
+          break;
+
+        case "exit-to-lobby":
+          exitToLobby();
+          showTemporaryToast("คู่แข่งได้กดออกจากเกมกลับสู่ห้องล็อบบี้");
+          break;
+      }
+    } catch (err) {
+      console.error("[Network Error] Failed to process data message:", err);
+      alert("ตรวจพบข้อผิดพลาดระบบเครือข่าย:\n" + err.name + ": " + err.message + "\n\nStack Trace:\n" + err.stack);
     }
   });
 
