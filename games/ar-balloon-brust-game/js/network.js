@@ -297,10 +297,11 @@ function setupConnectionListeners() {
 }
 
 function handleOpponentDisconnect() {
+  const wasInGame = gameActive;
+
   if (gameActive) {
     gameActive = false;
     if (gameInterval) clearInterval(gameInterval);
-    alert("คู่ต่อสู้ออกจากห้องเล่นเกมหรือขาดการเชื่อมต่อ!");
   }
 
   if (cameraInstance) {
@@ -318,8 +319,21 @@ function handleOpponentDisconnect() {
     heartbeatInterval = null;
   }
 
+  // Hide any active game overlays and HUD
+  const gameHudEl = document.getElementById("gameHud");
+  if (gameHudEl) gameHudEl.classList.add("hidden");
+  
+  const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+  if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
+  
+  const countdownOverlayEl = document.getElementById("countdownOverlay");
+  if (countdownOverlayEl) countdownOverlayEl.classList.add("hidden");
+  
+  const gameOverModalEl = document.getElementById("gameOverModal");
+  if (gameOverModalEl) gameOverModalEl.classList.add("hidden");
+
   if (myPlayerRole === "host") {
-    // HOST stays in the lobby and waits for a new guest
+    // HOST stays in the lobby and waits for a new guest (or same guest to reconnect)
     if (networkConnection) {
       networkConnection.close();
       networkConnection = null;
@@ -328,6 +342,20 @@ function handleOpponentDisconnect() {
     opponentInputReady = false;
     isMultiplayer = false;
     
+    // Show lobby view, hide other views
+    const roomLobbyViewEl = document.getElementById("roomLobbyView");
+    if (roomLobbyViewEl) roomLobbyViewEl.classList.remove("hidden");
+    
+    const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
+    if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.add("hidden");
+    
+    const menuViewEl = document.getElementById("menuView");
+    if (menuViewEl) menuViewEl.classList.add("hidden");
+    
+    const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+    if (startScreenOverlayEl) startScreenOverlayEl.classList.remove("hidden");
+
+    // Reset lobby UI for waiting guest
     const lobbyGuestName = document.getElementById("lobbyGuestName");
     if (lobbyGuestName) {
       lobbyGuestName.innerText = "รอผู้ท้าชิงเข้าร่วม...";
@@ -346,9 +374,13 @@ function handleOpponentDisconnect() {
     lastLatency = -1;
     updateDebugNetworkUI();
     
-    showTemporaryToast("ผู้ท้าชิงได้ออกจากห้องแล้ว");
+    if (wasInGame) {
+      showTemporaryToast("การแข่งขันสิ้นสุด: ผู้ท้าชิงขาดการเชื่อมต่อ");
+    } else {
+      showTemporaryToast("ผู้ท้าชิงได้ออกจากห้องแล้ว");
+    }
   } else {
-    // GUEST leaves to P2P screen because host is gone
+    // GUEST leaves because host is gone
     leaveCurrentRoom();
 
     const roomLobbyViewEl = document.getElementById("roomLobbyView");
@@ -358,30 +390,23 @@ function handleOpponentDisconnect() {
     if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.remove("hidden");
     
     const menuViewEl = document.getElementById("menuView");
-    if (menuViewEl) menuViewEl.classList.add("hidden"); // Explicitly hide menuView to prevent overlapping
+    if (menuViewEl) menuViewEl.classList.add("hidden");
     
     const startScreenOverlayEl = document.getElementById("startScreenOverlay");
     if (startScreenOverlayEl) startScreenOverlayEl.classList.remove("hidden");
-    
-    const gameHudEl = document.getElementById("gameHud");
-    if (gameHudEl) gameHudEl.classList.add("hidden");
 
-    // Hide any active game overlays
-    const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
-    if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
-    
-    const countdownOverlayEl = document.getElementById("countdownOverlay");
-    if (countdownOverlayEl) countdownOverlayEl.classList.add("hidden");
-    
-    const gameOverModalEl = document.getElementById("gameOverModal");
-    if (gameOverModalEl) gameOverModalEl.classList.add("hidden");
-
-    // Reset camera status UI
-    const cameraStatusEl = document.getElementById("cameraStatus");
-    if (cameraStatusEl) {
-      cameraStatusEl.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
-      cameraStatusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+    if (wasInGame) {
+      showTemporaryToast("การแข่งขันสิ้นสุด: หัวหน้าห้องขาดการเชื่อมต่อ");
+    } else {
+      showTemporaryToast("ห้องแข่งขันนี้ถูกปิดโดยหัวหน้าห้อง หรือการเชื่อมต่อขัดข้อง");
     }
+  }
+
+  // Reset camera status UI
+  const cameraStatusEl = document.getElementById("cameraStatus");
+  if (cameraStatusEl) {
+    cameraStatusEl.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
+    cameraStatusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
   }
 }
 
