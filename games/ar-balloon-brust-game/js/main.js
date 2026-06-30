@@ -151,21 +151,32 @@ function toggleFullscreen() {
 
 // Update settings UI
 function updateGameUI() {
-  document.getElementById("gameTitleDisplay").innerText = GAME_TITLE;
-  document.getElementById("gameMissionDisplay").innerHTML = GAME_MISSION;
-  document.getElementById("headerSubtitle").innerText = GAME_TITLE;
-  document.getElementById("missionDescription").innerHTML = GAME_MISSION;
+  const startSubtitle = document.getElementById("startSubtitle");
+  if (startSubtitle) startSubtitle.innerText = GAME_TITLE;
+
+  const headerSubtitle = document.getElementById("headerSubtitle");
+  if (headerSubtitle) headerSubtitle.innerText = GAME_TITLE;
+
+  const missionDescription = document.getElementById("missionDescription");
+  if (missionDescription) missionDescription.innerHTML = GAME_MISSION;
   
   // Set category examples labels
-  document.getElementById("correctLabel").innerText = `ตัวอย่าง${CORRECT_CAT_NAME} (+10 คะแนน)`;
-  document.getElementById("incorrectLabel").innerText = `ตัวอย่าง${INCORRECT_CAT_NAME} (-5 คะแนน)`;
+  const correctLabel = document.getElementById("correctLabel");
+  if (correctLabel) correctLabel.innerText = `ตัวอย่าง${CORRECT_CAT_NAME} (+10 คะแนน)`;
+
+  const incorrectLabel = document.getElementById("incorrectLabel");
+  if (incorrectLabel) incorrectLabel.innerText = `ตัวอย่าง${INCORRECT_CAT_NAME} (-5 คะแนน)`;
   
   // Update correct/incorrect examples container
   const correctContainer = document.getElementById("correctExamplesContainer");
   const incorrectContainer = document.getElementById("incorrectExamplesContainer");
   
-  correctContainer.innerHTML = PRA_WORDS.slice(0, 4).map(w => `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">${w}</span>`).join('');
-  incorrectContainer.innerHTML = NON_PRA_WORDS.slice(0, 4).map(w => `<span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">${w}</span>`).join('');
+  if (correctContainer) {
+    correctContainer.innerHTML = PRA_WORDS.slice(0, 4).map(w => `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-semibold">${w}</span>`).join('');
+  }
+  if (incorrectContainer) {
+    incorrectContainer.innerHTML = NON_PRA_WORDS.slice(0, 4).map(w => `<span class="bg-rose-50 text-rose-500 border border-rose-200 text-xs px-2.5 py-1 rounded-lg font-semibold">${w}</span>`).join('');
+  }
 }
 
 // Switch control mode
@@ -478,15 +489,18 @@ createRoomBtn.addEventListener("click", () => {
   loadingOverlay.classList.remove("hidden");
   document.querySelector("#loadingOverlay h3").innerText = "กำลังสร้างห้องและขอรหัสเชื่อมต่อ P2P...";
 
-  peerInstance = new Peer();
+  // Generate a random 4-digit room code
+  const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+  roomId = roomCode;
+
+  // Use a prefix to prevent ID collisions on the public PeerJS server
+  peerInstance = new Peer('AR-BALLOON-' + roomCode);
 
   peerInstance.on("open", (id) => {
     loadingOverlay.classList.add("hidden");
     multiplayerSetupView.classList.add("hidden");
     roomLobbyView.classList.remove("hidden");
     
-    // Generate a 4-digit room code from PeerJS ID
-    roomId = id.slice(0, 4).toUpperCase();
     lobbyRoomCode.innerText = roomId;
     
     myPlayerRole = "host";
@@ -548,6 +562,14 @@ createRoomBtn.addEventListener("click", () => {
 // Show Join Room Input area
 joinRoomViewBtn.addEventListener("click", () => {
   joinInputArea.classList.toggle("hidden");
+  if (!joinInputArea.classList.contains("hidden")) {
+    roomCodeInput.focus();
+  }
+});
+
+// Clean and validate room code input to only allow 4 digits
+roomCodeInput.addEventListener("input", (e) => {
+  e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
 });
 
 // Join Room Handler
@@ -565,10 +587,8 @@ submitJoinRoomBtn.addEventListener("click", () => {
   peerInstance = new Peer();
 
   peerInstance.on("open", () => {
-    // We connect directly to the PeerJS ID. In a real system, the host ID is the targetId.
-    // If the targetId is a 4-digit code, we connect to it. Note: PeerJS ID must match the code.
-    // When the host created the room, they got a PeerJS ID. Let's connect to it.
-    networkConnection = peerInstance.connect(targetId);
+    // Connect to the host using the prefixed room code
+    networkConnection = peerInstance.connect('AR-BALLOON-' + targetId);
     myPlayerRole = "guest";
 
     networkConnection.on("open", () => {
@@ -643,34 +663,30 @@ startMultiplayerGameBtn.addEventListener("click", () => {
   }
 });
 
-// Load external templates JSON if available (handles CORS warning gracefully)
-async function loadExternalTemplates() {
-  try {
-    const response = await fetch('../../data/ar-balloon-brust-game.json');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    
-    // Merge fetched templates into GAME_TEMPLATES
-    Object.assign(GAME_TEMPLATES, data);
-    
-    // Update default arrays to match loaded data
-    if (GAME_TEMPLATES.thai_visanjanee) {
-      PRA_WORDS = [...GAME_TEMPLATES.thai_visanjanee.praWords];
-      NON_PRA_WORDS = [...GAME_TEMPLATES.thai_visanjanee.nonPraWords];
+// Load external templates from JS file (completely bypasses CORS)
+function loadExternalTemplates() {
+  if (typeof EXTERNAL_GAME_TEMPLATES !== 'undefined' && EXTERNAL_GAME_TEMPLATES) {
+    try {
+      // Merge fetched templates into GAME_TEMPLATES
+      Object.assign(GAME_TEMPLATES, EXTERNAL_GAME_TEMPLATES);
+      
+      // Update default arrays to match loaded data
+      if (GAME_TEMPLATES.thai_visanjanee) {
+        PRA_WORDS = [...GAME_TEMPLATES.thai_visanjanee.praWords];
+        NON_PRA_WORDS = [...GAME_TEMPLATES.thai_visanjanee.nonPraWords];
+      }
+      updateGameUI();
+      console.log("Successfully loaded external word templates from JS file.");
+    } catch (err) {
+      console.error("Error merging templates from JS file:", err);
     }
-    updateGameUI();
-    
-    // Populates word settings select box dynamically
-    templateSelect.innerHTML = `<option value="">-- เลือกเทมเพลตชุดคำศัพท์ --</option>` + 
-      Object.keys(GAME_TEMPLATES).map(key => `<option value="${key}">${GAME_TEMPLATES[key].title}</option>`).join('');
-    
-    console.log("Successfully loaded external word templates.");
-  } catch (err) {
-    console.warn("Could not load external templates from JSON (this is normal if running via file:// protocol). Using local fallback.", err);
-    // Populate select box with fallback templates
-    templateSelect.innerHTML = `<option value="">-- เลือกเทมเพลตชุดคำศัพท์ --</option>` + 
-      Object.keys(GAME_TEMPLATES).map(key => `<option value="${key}">${GAME_TEMPLATES[key].title}</option>`).join('');
+  } else {
+    console.warn("EXTERNAL_GAME_TEMPLATES is not defined. Using local fallback.");
   }
+  
+  // Populate select box with templates
+  templateSelect.innerHTML = `<option value="">-- เลือกเทมเพลตชุดคำศัพท์ --</option>` + 
+    Object.keys(GAME_TEMPLATES).map(key => `<option value="${key}">${GAME_TEMPLATES[key].title}</option>`).join('');
 }
 
 // Initial Calls

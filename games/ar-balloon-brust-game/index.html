@@ -218,7 +218,7 @@
                 <div id="joinInputArea" class="hidden space-y-2 pt-2 border-t border-white/10">
                   <label class="block text-xs text-left text-sky-200 font-bold">กรอกรหัสห้อง 4 หลัก:</label>
                   <div class="flex gap-2">
-                    <input id="roomCodeInput" type="text" placeholder="เช่น ABCD" class="flex-grow p-2 text-center text-slate-800 font-black rounded-lg text-lg focus:outline-none uppercase">
+                    <input id="roomCodeInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="เช่น 1234" class="flex-grow p-2 text-center text-slate-800 font-black rounded-lg text-lg focus:outline-none">
                     <button id="submitJoinRoomBtn" class="px-4 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-xs rounded-lg transition">
                       เชื่อมต่อ
                     </button>
@@ -523,6 +523,7 @@
 
   <!-- Game Scripts in Clean Architecture Modules -->
   <script src="js/state.js"></script>
+  <script src="js/data-ar-balloon-brust-game.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/entities.js"></script>
   <script src="js/network.js"></script>

@@ -236,6 +236,9 @@ function gameLoop(timestamp) {
         score += pointsGained;
         
         playSynthSound('popCorrect');
+        if ('vibrate' in navigator) {
+          navigator.vibrate(40); // Short pulse for correct pop
+        }
         
         let feedbackMsg = `เก่งมาก! "${b.word}" เป็น${CORRECT_CAT_NAME} +${pointsGained}`;
         if (comboCount >= 3) {
@@ -256,6 +259,9 @@ function gameLoop(timestamp) {
         comboCount = 0;
         score = Math.max(0, score - 5);
         playSynthSound('popIncorrect');
+        if ('vibrate' in navigator) {
+          navigator.vibrate([100, 50, 100]); // Error vibration pattern
+        }
         showFeedbackMessage(`พลาดแล้ว! "${b.word}" ไม่ใช่${CORRECT_CAT_NAME} -5`, false);
         createTextParticle(b.x, b.y, "-5", "#ef4444", false);
         
