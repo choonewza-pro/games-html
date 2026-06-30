@@ -578,9 +578,6 @@ createRoomBtn.addEventListener("click", () => {
     startMultiplayerGameBtn.classList.remove("opacity-50", "cursor-not-allowed", "bg-gradient-to-r", "from-emerald-400", "to-teal-400");
     startMultiplayerGameBtn.classList.add("bg-emerald-500", "hover:bg-emerald-600");
     startMultiplayerGameBtn.innerText = "เริ่มเกมจับคู่! ⚔️";
-
-    setupConnectionListeners();
-
     networkConnection.on("open", () => {
       networkConnection.send({
         type: "init",
@@ -597,6 +594,7 @@ createRoomBtn.addEventListener("click", () => {
         seed: randomSeed,
         matchMode: matchMode
       });
+      setupConnectionListeners();
     });
   });
 

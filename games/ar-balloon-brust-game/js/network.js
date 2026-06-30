@@ -14,20 +14,24 @@ function setupConnectionListeners() {
   if (heartbeatInterval) clearInterval(heartbeatInterval);
   
   heartbeatInterval = setInterval(() => {
+    // 1. Send ping if connection is open
     if (networkConnection && networkConnection.open) {
       try {
         networkConnection.send({ type: "ping" });
       } catch (e) {
         console.warn("Heartbeat send failed:", e);
       }
-      
-      // Check for timeout (6 seconds of no messages)
-      if (Date.now() - lastOpponentHeartbeatTime > 6000) {
-        console.warn("Heartbeat timeout. Opponent disconnected.");
+    }
+    
+    // 2. Check for connection loss or timeout (outside the .open check!)
+    if (networkConnection) {
+      const timeSinceLastHeartbeat = Date.now() - lastOpponentHeartbeatTime;
+      if (!networkConnection.open || timeSinceLastHeartbeat > 15000) {
+        console.warn("Connection closed or heartbeat timeout. Disconnecting.");
         handleOpponentDisconnect();
       }
     }
-  }, 2000);
+  }, 3000);
 
   networkConnection.on("data", (data) => {
     try {
