@@ -6,6 +6,7 @@ let lastOpponentHeartbeatTime = 0;
 let heartbeatInterval = null;
 let pingsSentCount = 0;
 let pingsRecvCount = 0;
+let lastLatency = -1;
 
 function updateDebugNetworkUI() {
   try {
@@ -14,19 +15,54 @@ function updateDebugNetworkUI() {
     const debugLastHb = document.getElementById("debugLastHb");
     const debugPingSent = document.getElementById("debugPingSent");
     const debugPingRecv = document.getElementById("debugPingRecv");
+    const debugPingVal = document.getElementById("debugPingVal");
+    const debugRoomId = document.getElementById("debugRoomId");
+    const debugStatusDot = document.getElementById("debugStatusDot");
     
     if (debugRole) {
       debugRole.innerText = "ROLE: " + (myPlayerRole ? myPlayerRole.toUpperCase() : "UNKNOWN");
     }
     
+    const isOpen = networkConnection && networkConnection.open;
+    
+    if (debugStatusDot) {
+      if (isOpen) {
+        debugStatusDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+      } else if (networkConnection) {
+        debugStatusDot.className = "w-2 h-2 rounded-full bg-rose-500";
+      } else {
+        debugStatusDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+      }
+    }
+    
     if (debugConnState) {
       if (networkConnection) {
-        debugConnState.innerText = networkConnection.open ? "OPEN (Connected)" : "CLOSED (Disconnected)";
-        debugConnState.className = networkConnection.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+        debugConnState.innerText = isOpen ? "เปิด (เชื่อมต่อแล้ว)" : "ปิด (ขาดการติดต่อ)";
+        debugConnState.className = isOpen ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
       } else {
-        debugConnState.innerText = "NULL (No connection)";
-        debugConnState.className = "text-rose-400 font-bold";
+        debugConnState.innerText = "ไม่ได้เชื่อมต่อ";
+        debugConnState.className = "text-slate-500 font-bold";
       }
+    }
+    
+    if (debugPingVal) {
+      if (isOpen && lastLatency >= 0) {
+        debugPingVal.innerText = lastLatency + " ms";
+        if (lastLatency < 100) {
+          debugPingVal.className = "text-emerald-400 font-bold";
+        } else if (lastLatency < 250) {
+          debugPingVal.className = "text-amber-400 font-bold";
+        } else {
+          debugPingVal.className = "text-rose-400 font-bold";
+        }
+      } else {
+        debugPingVal.innerText = "-- ms";
+        debugPingVal.className = "text-slate-500 font-bold";
+      }
+    }
+    
+    if (debugRoomId) {
+      debugRoomId.innerText = roomId || (typeof targetId !== 'undefined' ? targetId : "-");
     }
     
     if (debugLastHb) {
@@ -56,6 +92,7 @@ function setupConnectionListeners() {
     lastOpponentHeartbeatTime = Date.now();
     pingsSentCount = 0;
     pingsRecvCount = 0;
+    lastLatency = -1;
     if (heartbeatInterval) clearInterval(heartbeatInterval);
     
     updateDebugNetworkUI();
@@ -65,7 +102,7 @@ function setupConnectionListeners() {
         // 1. Send ping if connection is open
         if (networkConnection && networkConnection.open) {
           try {
-            networkConnection.send({ type: "ping" });
+            networkConnection.send({ type: "ping", sentAt: Date.now() });
             pingsSentCount++;
           } catch (e) {
             console.warn("Heartbeat send failed:", e);
@@ -92,13 +129,26 @@ function setupConnectionListeners() {
         // Update heartbeat timestamp on any message received
         lastOpponentHeartbeatTime = Date.now();
 
-        if (data.type !== "ping" && data.type !== "pointer") {
+        if (data.type !== "ping" && data.type !== "pong" && data.type !== "pointer") {
           showTemporaryToast("[Debug] Received: " + data.type);
         }
 
         switch (data.type) {
           case "ping":
             pingsRecvCount++;
+            // Reply with pong containing original sentAt
+            if (networkConnection && networkConnection.open) {
+              try {
+                networkConnection.send({ type: "pong", sentAt: data.sentAt });
+              } catch (e) {}
+            }
+            updateDebugNetworkUI();
+            break;
+            
+          case "pong":
+            if (data.sentAt) {
+              lastLatency = Date.now() - data.sentAt;
+            }
             updateDebugNetworkUI();
             break;
           case "init":
