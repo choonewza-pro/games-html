@@ -104,6 +104,7 @@ let maxCombo = 0;
 let shakeIntensity = 0;
 let activeComboAnnounce = null; 
 let lastTime = 0; 
+let smoothDt = 1.0;
 let lastTimePointerSent = 0; 
 
 // MediaPipe variables

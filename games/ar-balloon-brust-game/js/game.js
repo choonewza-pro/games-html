@@ -59,6 +59,8 @@ function startGameplay() {
   opponentMaxCombo = 0;
   balloonSeqId = 0;
   spawnTimer = 0;
+  lastTime = 0;
+  smoothDt = 1.0;
 
   // Reset pointers and tracking states to prevent stale values between sessions
   trackingActive = false;
@@ -124,11 +126,22 @@ function gameLoop(timestamp) {
   const logicHeight = canvas.height / (window.devicePixelRatio || 1);
 
   // Calculate Delta Time (dt)
-  if (!lastTime) lastTime = timestamp;
-  let dt = (timestamp - lastTime) / 16.667; 
+  if (!lastTime) {
+    lastTime = timestamp;
+    smoothDt = 1.0;
+  }
+  let rawDt = (timestamp - lastTime) / 16.667; 
   lastTime = timestamp;
 
-  if (dt > 10) dt = 1.0;
+  // If there's a huge lag spike (e.g., tab suspended), reset instead of jumping
+  if (rawDt > 5.0) {
+    rawDt = 1.0;
+  }
+
+  // Smooth dt using Exponential Moving Average to eliminate micro-stutters
+  // 0.15 weight on new frame, 0.85 on history
+  smoothDt = smoothDt * 0.85 + rawDt * 0.15;
+  let dt = smoothDt;
 
   // Lerp pointer smoothing (Frame-rate independent)
   if (trackingActive) {
