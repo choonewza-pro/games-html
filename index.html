@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Menu</title>
+  <title>Game Menu - AR Educational Games</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,68 +12,50 @@
     body { font-family: 'Kanit', sans-serif; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
-  <div class="min-h-screen flex flex-col items-center justify-center p-6">
-    <h1 class="text-5xl font-extrabold text-center text-white mb-2 drop-shadow-lg">Game Menu</h1>
-    <p class="text-center text-purple-200 mb-10 text-lg">เลือกเกมที่คุณต้องการเล่น</p>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-2xl flex flex-col items-center">
+    <h1 class="text-5xl font-extrabold text-center text-white mb-2 drop-shadow-lg tracking-wide">
+      Game Menu
+    </h1>
+    <p class="text-center text-purple-200 mb-10 text-lg">เลือกเกมที่คุณต้องการเล่นเพื่อเริ่มต้นการเรียนรู้</p>
 
-    <div id="game-list" class="grid gap-6 w-full max-w-2xl">
-      <div class="text-center text-purple-300 text-xl">กำลังโหลดเกม...</div>
+    <div class="grid gap-6 w-full">
+      <!-- Game 1: Balloon Burst v1 -->
+      <a href="games/ar_balloon_burst_game_v1.html"
+         class="block p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <span class="text-4xl">🎈</span>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Balloon Burst v1</h2>
+            <p class="text-purple-200 text-sm mt-1">เกมเป่าลูกโป่ง คำประวิสรรชนีย์ และคำไม่ประวิสรรชนีย์ (เล่นคนเดียว)</p>
+          </div>
+        </div>
+      </a>
+
+      <!-- Game 2: Balloon Burst v2 -->
+      <a href="games/ar_balloon_burst_game_v2.html"
+         class="block p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <span class="text-4xl">🎮</span>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Balloon Burst v2</h2>
+            <p class="text-purple-200 text-sm mt-1">เกมเป่าลูกโป่งออนไลน์แบบผู้เล่นหลายคน (Multiplayer - Firebase)</p>
+          </div>
+        </div>
+      </a>
+
+      <!-- Game 3: Balloon Burst v3 (P2P VS) -->
+      <a href="games/ar-balloon-brust-game/index.html"
+         class="block p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <span class="text-4xl">⚔️</span>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Balloon Burst v3 (P2P VS)</h2>
+            <p class="text-purple-200 text-sm mt-1">เกมเป่าลูกโป่งวิชาการแบบโต้ตอบด้วยมือ (AR) มีโหมดแข่งออนไลน์ P2P (PeerJS) ซิงค์ตำแหน่งนิ้วและนับถอยหลัง</p>
+          </div>
+        </div>
+      </a>
     </div>
   </div>
-
-  <script>
-    async function loadGames() {
-      const container = document.getElementById('game-list');
-      try {
-        const res = await fetch('https://api.github.com/repos/choonewza-pro/games-html/contents/games');
-        if (!res.ok) throw new Error('API error');
-        const items = await res.json();
-        
-        // Filter for HTML files (excluding index.html) and subdirectories
-        const gamesList = items.filter(item => 
-          (item.type === 'file' && item.name.endsWith('.html') && item.name !== 'index.html') ||
-          (item.type === 'dir')
-        );
-
-        if (gamesList.length === 0) {
-          container.innerHTML = '<div class="text-center text-purple-300 text-xl">ไม่มีเกมในขณะนี้</div>';
-          return;
-        }
-
-        const cards = await Promise.all(gamesList.map(async (item) => {
-          let title = item.name.replace(/\.html$/, '').replace(/[-_]/g, ' ');
-          let gamePath = item.path;
-          let downloadUrl = item.download_url;
-
-          if (item.type === 'dir') {
-            gamePath = `${item.path}/index.html`;
-            downloadUrl = `https://raw.githubusercontent.com/choonewza-pro/games-html/main/${item.path}/index.html`;
-          }
-
-          try {
-            const fileRes = await fetch(downloadUrl);
-            const text = await fileRes.text();
-            const match = text.match(/<title>([^<]+)<\/title>/);
-            if (match) title = match[1];
-          } catch {}
-
-          const emoji = title.toLowerCase().includes('v2') || title.toLowerCase().includes('v3') ? '🎮' : '🎈';
-          return `
-            <a href="${gamePath}"
-               class="block p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
-              <h2 class="text-2xl font-bold text-white">${emoji} ${title}</h2>
-              <p class="text-purple-200 mt-2">${gamePath}</p>
-            </a>
-          `;
-        }));
-
-        container.innerHTML = cards.join('');
-      } catch (err) {
-        container.innerHTML = '<div class="text-center text-purple-300 text-xl">ไม่สามารถโหลดรายชื่อเกมได้</div>';
-      }
-    }
-    loadGames();
-  </script>
 </body>
 </html>
