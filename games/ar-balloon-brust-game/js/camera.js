@@ -45,7 +45,12 @@ async function initCameraAndAI() {
       height: 720
     });
 
-    await cameraInstance.start();
+    // Set a 5-second timeout for camera start to prevent getting stuck
+    const cameraStartPromise = cameraInstance.start();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Camera start timeout")), 5000)
+    );
+    await Promise.race([cameraStartPromise, timeoutPromise]);
     
     loadingOverlay.classList.add("hidden");
     cameraStatus.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
