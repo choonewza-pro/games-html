@@ -318,39 +318,70 @@ function handleOpponentDisconnect() {
     heartbeatInterval = null;
   }
 
-  leaveCurrentRoom();
+  if (myPlayerRole === "host") {
+    // HOST stays in the lobby and waits for a new guest
+    if (networkConnection) {
+      networkConnection.close();
+      networkConnection = null;
+    }
+    
+    opponentInputReady = false;
+    isMultiplayer = false;
+    
+    const lobbyGuestName = document.getElementById("lobbyGuestName");
+    if (lobbyGuestName) {
+      lobbyGuestName.innerText = "รอผู้ท้าชิงเข้าร่วม...";
+      lobbyGuestName.className = "text-slate-200 italic";
+    }
+    
+    const startMultiplayerGameBtn = document.getElementById("startMultiplayerGameBtn");
+    if (startMultiplayerGameBtn) {
+      startMultiplayerGameBtn.disabled = true;
+      startMultiplayerGameBtn.className = "w-full py-3.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-black text-lg rounded-2xl shadow-xl transition opacity-50 cursor-not-allowed";
+      startMultiplayerGameBtn.innerText = "รอผู้ท้าชิง...";
+    }
+    
+    pingsSentCount = 0;
+    pingsRecvCount = 0;
+    lastLatency = -1;
+    updateDebugNetworkUI();
+    
+    showTemporaryToast("ผู้ท้าชิงได้ออกจากห้องแล้ว");
+  } else {
+    // GUEST leaves to P2P screen because host is gone
+    leaveCurrentRoom();
 
-  // Ensure we go back to the very first main menu
-  const roomLobbyViewEl = document.getElementById("roomLobbyView");
-  if (roomLobbyViewEl) roomLobbyViewEl.classList.add("hidden");
-  
-  const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
-  if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.add("hidden");
-  
-  const menuViewEl = document.getElementById("menuView");
-  if (menuViewEl) menuViewEl.classList.remove("hidden");
-  
-  const startScreenOverlayEl = document.getElementById("startScreenOverlay");
-  if (startScreenOverlayEl) startScreenOverlayEl.classList.remove("hidden");
-  
-  const gameHudEl = document.getElementById("gameHud");
-  if (gameHudEl) gameHudEl.classList.add("hidden");
+    const roomLobbyViewEl = document.getElementById("roomLobbyView");
+    if (roomLobbyViewEl) roomLobbyViewEl.classList.add("hidden");
+    
+    const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
+    if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.remove("hidden");
+    
+    const menuViewEl = document.getElementById("menuView");
+    if (menuViewEl) menuViewEl.classList.add("hidden"); // Explicitly hide menuView to prevent overlapping
+    
+    const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+    if (startScreenOverlayEl) startScreenOverlayEl.classList.remove("hidden");
+    
+    const gameHudEl = document.getElementById("gameHud");
+    if (gameHudEl) gameHudEl.classList.add("hidden");
 
-  // Hide any active game overlays
-  const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
-  if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
-  
-  const countdownOverlayEl = document.getElementById("countdownOverlay");
-  if (countdownOverlayEl) countdownOverlayEl.classList.add("hidden");
-  
-  const gameOverModalEl = document.getElementById("gameOverModal");
-  if (gameOverModalEl) gameOverModalEl.classList.add("hidden");
+    // Hide any active game overlays
+    const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+    if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
+    
+    const countdownOverlayEl = document.getElementById("countdownOverlay");
+    if (countdownOverlayEl) countdownOverlayEl.classList.add("hidden");
+    
+    const gameOverModalEl = document.getElementById("gameOverModal");
+    if (gameOverModalEl) gameOverModalEl.classList.add("hidden");
 
-  // Reset camera status UI
-  const cameraStatusEl = document.getElementById("cameraStatus");
-  if (cameraStatusEl) {
-    cameraStatusEl.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
-    cameraStatusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+    // Reset camera status UI
+    const cameraStatusEl = document.getElementById("cameraStatus");
+    if (cameraStatusEl) {
+      cameraStatusEl.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
+      cameraStatusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+    }
   }
 }
 
@@ -391,6 +422,9 @@ function leaveCurrentRoom() {
   
   const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
   if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.remove("hidden");
+  
+  const menuViewEl = document.getElementById("menuView");
+  if (menuViewEl) menuViewEl.classList.add("hidden"); // Explicitly hide menuView when returning to setup view
   
   const wordSettingsBtnEl = document.getElementById("wordSettingsBtn");
   if (wordSettingsBtnEl) {
