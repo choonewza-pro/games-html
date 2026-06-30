@@ -39,15 +39,6 @@
     .bounce-element {
       animation: bounce-slow 3s ease-in-out infinite;
     }
-    @keyframes countdown-zoom {
-      0% { transform: scale(0.3); opacity: 0; }
-      30% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { transform: scale(2.2); opacity: 0; }
-    }
-    .countdown-pulse {
-      animation: countdown-zoom 1s ease-out forwards;
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800">
@@ -310,23 +301,6 @@
             <h3 class="text-lg font-bold text-amber-300">กำลังเชื่อมต่อกล้องเว็บแคมและโหลด AI...</h3>
             <p class="text-xs text-slate-400 mt-2 max-w-xs">กรุณากด "อนุญาต" เข้าถึงกล้องถ่ายภาพเมื่อระบบร้องขอ เพื่อเล่นโหมดตรวจจับมือ</p>
           </div>
-        </div>
-
-        <!-- Guest Pre-Start Confirmation Modal -->
-        <div id="guestPreStartOverlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center z-26">
-          <div class="max-w-sm bg-white/10 p-6 rounded-3xl border border-white/20 shadow-2xl">
-            <span class="text-5xl mb-4 block animate-bounce">🎮</span>
-            <h3 class="text-xl font-black text-amber-300">ผู้สร้างห้องกำลังเริ่มเกม!</h3>
-            <p class="text-xs text-slate-200 mt-2 mb-6">กรุณากดปุ่มด้านล่างเพื่ออนุญาตการแสดงผลเต็มจอ เตรียมกล้อง และเข้าสู่การแข่งขัน</p>
-            <button id="guestConfirmStartBtn" class="w-full py-3.5 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-slate-900 font-black text-base rounded-2xl shadow-lg transform active:scale-95 transition">
-              เข้าสู่การแข่งขัน
-            </button>
-          </div>
-        </div>
-
-        <!-- Game Countdown Overlay -->
-        <div id="countdownOverlay" class="hidden absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center text-center z-27 overflow-hidden pointer-events-none">
-          <div id="countdownNumber" class="text-8xl md:text-9xl font-black text-amber-400 font-sans select-none">3</div>
         </div>
 
         <!-- Pause Overlay -->
@@ -609,21 +583,6 @@
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.05);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.05);
-      } else if (type === 'countdownBeep') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-      } else if (type === 'countdownGo') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
       }
     }
 
@@ -792,10 +751,7 @@
     let opponentScore = 0;
     let opponentCombo = 0;
     let opponentPointer = { x: -100, y: -100, active: false };
-    let opponentTargetPointer = { x: -100, y: -100 };
     let matchMode = "share"; // v3: "share" (แย่งกันเจาะ) or "individual" (ต่างคนต่างเจาะ)
-    let localInputReady = false;
-    let opponentInputReady = false;
     
     let peerInstance = null;
     let networkConnection = null; 
@@ -1127,17 +1083,10 @@
 
       handsDetector.onResults(onHandResults);
 
-      let lastHandDetectionTime = 0;
-      const DETECTION_THROTTLE_MS = 50; // Throttle to 20 FPS to reduce CPU/GPU load
-
       cameraInstance = new Camera(videoElement, {
         onFrame: async () => {
           if (gameMode === "ai" && gameActive) {
-            const now = performance.now();
-            if (now - lastHandDetectionTime >= DETECTION_THROTTLE_MS) {
-              lastHandDetectionTime = now;
-              await handsDetector.send({ image: videoElement });
-            }
+            await handsDetector.send({ image: videoElement });
           }
         },
         width: 1280,
@@ -1202,20 +1151,9 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     }
 
-    // Object Pools for preventing garbage collection stutter
-    const balloonPool = [];
-    const particlePool = [];
-    const textParticlePool = [];
-
     // Balloon Class Object
     class Balloon {
       constructor(canvasWidth, canvasHeight) {
-        if (canvasWidth !== undefined) {
-          this.init(canvasWidth, canvasHeight);
-        }
-      }
-
-      init(canvasWidth, canvasHeight) {
         this.logicWidth = canvasWidth / (window.devicePixelRatio || 1);
         this.logicHeight = canvasHeight / (window.devicePixelRatio || 1);
         
@@ -1313,12 +1251,6 @@
     // Pop Particle Effect System
     class Particle {
       constructor(x, y, color) {
-        if (x !== undefined) {
-          this.init(x, y, color);
-        }
-      }
-
-      init(x, y, color) {
         this.x = x;
         this.y = y;
         this.color = color;
@@ -1349,14 +1281,7 @@
 
     function createExplosion(x, y, color) {
       for (let i = 0; i < 18; i++) {
-        let p;
-        if (particlePool.length > 0) {
-          p = particlePool.pop();
-          p.init(x, y, color);
-        } else {
-          p = new Particle(x, y, color);
-        }
-        particles.push(p);
+        particles.push(new Particle(x, y, color));
       }
     }
 
@@ -1375,19 +1300,10 @@
       wordSettingsBtn.disabled = false;
       
       startScreenOverlay.classList.add("hidden");
-      
-      // Go fullscreen on user gesture
-      if (!document.fullscreenElement) {
-        toggleFullscreen();
-      }
-
-      loadingOverlay.classList.remove("hidden");
-      document.querySelector("#loadingOverlay h3").innerText = "กำลังเชื่อมต่อกล้องเว็บแคมและโหลด AI...";
-
-      switchPlayMode(gameMode).then(() => {
-        triggerCountdown();
+      switchPlayMode("ai").then(() => {
+        startGameplay();
       }).catch(() => {
-        triggerCountdown(); 
+        startGameplay(); 
       });
     });
 
@@ -1613,35 +1529,27 @@
             showTemporaryToast("หัวหน้าห้องเปลี่ยนกติกาการแข่งเป็น: " + (matchMode === "share" ? "แย่งกันเจาะ" : "ต่างคนต่างเจาะ"));
             break;
 
-          case "pre_start":
+          case "start":
             randomSeed = data.seed;
             matchMode = data.matchMode || "share";
+            startScreenOverlay.classList.add("hidden");
             isMultiplayer = true;
             myScoreLabel.innerText = "ฉัน";
             opponentScoreContainer.classList.remove("hidden");
             
-            localInputReady = false;
-            opponentInputReady = false;
-
-            document.getElementById("guestPreStartOverlay").classList.remove("hidden");
-            startScreenOverlay.classList.add("hidden");
-            break;
-
-          case "ready":
-            opponentInputReady = true;
-            if (localInputReady) {
-              triggerCountdown();
-            }
+            switchPlayMode("ai").then(() => {
+              startGameplay();
+            }).catch(() => {
+              startGameplay(); 
+            });
             break;
 
           case "pointer":
-            opponentTargetPointer.x = data.x;
-            opponentTargetPointer.y = data.y;
-            if (!opponentPointer.active && data.active) {
-              opponentPointer.x = data.x;
-              opponentPointer.y = data.y;
-            }
-            opponentPointer.active = data.active;
+            opponentPointer = {
+              x: data.x,
+              y: data.y,
+              active: data.active
+            };
             break;
 
           case "pop":
@@ -1704,70 +1612,24 @@
         const newSeed = Math.floor(Math.random() * 100000);
         randomSeed = newSeed;
 
-        // Go fullscreen on user gesture
-        if (!document.fullscreenElement) {
-          toggleFullscreen();
-        }
-
-        // Send pre_start command containing the seed and current matchMode
+        // Send start command containing the seed and current matchMode
         networkConnection.send({
-          type: "pre_start",
+          type: "start",
           seed: newSeed,
           matchMode: matchMode
         });
 
+        startScreenOverlay.classList.add("hidden");
         isMultiplayer = true;
         myScoreLabel.innerText = "ฉัน";
         opponentScoreContainer.classList.remove("hidden");
-
-        // Show waiting overlay
-        loadingOverlay.classList.remove("hidden");
-        document.querySelector("#loadingOverlay h3").innerText = "กำลังเตรียมกล้องและรอผู้เล่นอีกฝ่าย...";
-
-        localInputReady = false;
-        opponentInputReady = false;
-
-        switchPlayMode(gameMode).then(() => {
-          localInputReady = true;
-          networkConnection.send({ type: "ready" });
-          if (opponentInputReady) {
-            triggerCountdown();
-          }
+        
+        switchPlayMode("ai").then(() => {
+          startGameplay();
         }).catch(() => {
-          localInputReady = true;
-          networkConnection.send({ type: "ready" });
-          if (opponentInputReady) {
-            triggerCountdown();
-          }
+          startGameplay(); 
         });
       }
-    });
-
-    // Guest Click Confirm Start
-    document.getElementById("guestConfirmStartBtn").addEventListener("click", () => {
-      document.getElementById("guestPreStartOverlay").classList.add("hidden");
-
-      // Go fullscreen on user gesture
-      if (!document.fullscreenElement) {
-        toggleFullscreen();
-      }
-
-      loadingOverlay.classList.remove("hidden");
-      document.querySelector("#loadingOverlay h3").innerText = "กำลังเตรียมกล้องเว็บแคมและโหลด AI...";
-
-      switchPlayMode(gameMode).then(() => {
-        localInputReady = true;
-        networkConnection.send({ type: "ready" });
-        if (opponentInputReady) {
-          triggerCountdown();
-        }
-      }).catch(() => {
-        localInputReady = true;
-        networkConnection.send({ type: "ready" });
-        if (opponentInputReady) {
-          triggerCountdown();
-        }
-      });
     });
 
     leaveRoomBtn.addEventListener("click", leaveCurrentRoom);
@@ -1824,45 +1686,6 @@
     // ==========================================
     // CORE GAMEPLAY LOGIC
     // ==========================================
-
-    function triggerCountdown() {
-      // Hide all loading and pre-start overlays
-      loadingOverlay.classList.add("hidden");
-      document.getElementById("guestPreStartOverlay").classList.add("hidden");
-      startScreenOverlay.classList.add("hidden");
-
-      // Show countdown overlay
-      const countdownOverlay = document.getElementById("countdownOverlay");
-      const countdownNumber = document.getElementById("countdownNumber");
-      countdownOverlay.classList.remove("hidden");
-
-      let count = 3;
-      countdownNumber.innerText = count;
-      countdownNumber.className = "text-8xl md:text-9xl font-black text-amber-400 font-sans select-none countdown-pulse";
-      playSynthSound('countdownBeep');
-
-      const interval = setInterval(() => {
-        count--;
-        if (count > 0) {
-          countdownNumber.innerText = count;
-          // Reset animation by triggering reflow
-          countdownNumber.classList.remove("countdown-pulse");
-          void countdownNumber.offsetWidth; // reflow
-          countdownNumber.classList.add("countdown-pulse");
-          playSynthSound('countdownBeep');
-        } else if (count === 0) {
-          countdownNumber.innerText = "เริ่มได้! 🎈";
-          countdownNumber.classList.remove("countdown-pulse");
-          void countdownNumber.offsetWidth; // reflow
-          countdownNumber.classList.add("countdown-pulse");
-          playSynthSound('countdownGo');
-        } else {
-          clearInterval(interval);
-          countdownOverlay.classList.add("hidden");
-          startGameplay();
-        }
-      }, 1000);
-    }
 
     function startGameplay() {
       score = 0;
@@ -1944,13 +1767,6 @@
         activePointer.y += (targetPointer.y - activePointer.y) * lerpFactor;
       }
 
-      // Lerp opponent pointer smoothing (Frame-rate independent)
-      if (isMultiplayer && opponentPointer && opponentPointer.active) {
-        const lerpFactor = 1 - Math.pow(1 - 0.20, dt); // slightly slower (0.20) for network jitter smoothing
-        opponentPointer.x += (opponentTargetPointer.x - opponentPointer.x) * lerpFactor;
-        opponentPointer.y += (opponentTargetPointer.y - opponentPointer.y) * lerpFactor;
-      }
-
       ctx.save();
 
       // Apply Screen Shake
@@ -2008,19 +1824,12 @@
       }
       ctx.restore();
 
-      // Deterministic Time-Based Spawning (Using Balloon Pool)
+      // Deterministic Time-Based Spawning
       spawnTimer += dt * 16.667;
       if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
         if (balloons.length < 5) {
-          let b;
-          if (balloonPool.length > 0) {
-            b = balloonPool.pop();
-            b.init(canvas.width, canvas.height);
-          } else {
-            b = new Balloon(canvas.width, canvas.height);
-          }
-          balloons.push(b);
+          balloons.push(new Balloon(canvas.width, canvas.height));
         }
       }
 
@@ -2091,11 +1900,8 @@
           }
         }
 
-        // Object pooling release & swap-with-last removal
         if (b.y < -b.radius || b.popped) {
-          balloonPool.push(b);
-          balloons[i] = balloons[balloons.length - 1];
-          balloons.pop();
+          balloons.splice(i, 1);
         }
       }
 
@@ -2105,9 +1911,7 @@
         p.update(dt);
         p.draw(ctx);
         if (p.alpha <= 0) {
-          particlePool.push(p);
-          particles[i] = particles[particles.length - 1];
-          particles.pop();
+          particles.splice(i, 1);
         }
       }
 
@@ -2117,9 +1921,7 @@
         tp.update(dt);
         tp.draw(ctx);
         if (tp.alpha <= 0) {
-          textParticlePool.push(tp);
-          textParticles[i] = textParticles[textParticles.length - 1];
-          textParticles.pop();
+          textParticles.splice(i, 1);
         }
       }
 
@@ -2219,7 +2021,7 @@
       }
 
       // Render Opponent Ghost Pointer (Cyan Ring)
-      if (isMultiplayer && matchMode === "share" && opponentPointer && opponentPointer.active) {
+      if (isMultiplayer && opponentPointer && opponentPointer.active) {
         ctx.save();
         
         const currentHeight = canvas.height / (window.devicePixelRatio || 1);
@@ -2277,12 +2079,6 @@
     // Text Particle Class
     class TextParticle {
       constructor(x, y, text, color, isBig = false) {
-        if (x !== undefined) {
-          this.init(x, y, text, color, isBig);
-        }
-      }
-      
-      init(x, y, text, color, isBig = false) {
         this.x = x;
         this.y = y;
         this.text = text;
@@ -2315,14 +2111,7 @@
     }
 
     function createTextParticle(x, y, text, color, isBig) {
-      let tp;
-      if (textParticlePool.length > 0) {
-        tp = textParticlePool.pop();
-        tp.init(x, y, text, color, isBig);
-      } else {
-        tp = new TextParticle(x, y, text, color, isBig);
-      }
-      textParticles.push(tp);
+      textParticles.push(new TextParticle(x, y, text, color, isBig));
     }
 
     // Web Speech API Thai pronunciation helper
