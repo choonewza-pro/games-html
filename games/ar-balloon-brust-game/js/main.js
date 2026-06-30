@@ -677,11 +677,30 @@ leaveRoomBtn.addEventListener("click", () => {
 
 // Host click start game
 startMultiplayerGameBtn.addEventListener("click", () => {
-  if (myPlayerRole === "host" && networkConnection && networkConnection.open) {
+  try {
+    showTemporaryToast("[Debug] Host clicked Start Button");
+    
+    if (!networkConnection) {
+      alert("[Debug] Clicked, but networkConnection is null!");
+      return;
+    }
+    if (!networkConnection.open) {
+      alert("[Debug] Clicked, but networkConnection.open is false! Connection status is not open.");
+      return;
+    }
+    if (myPlayerRole !== "host") {
+      alert("[Debug] Clicked, but myPlayerRole is " + myPlayerRole);
+      return;
+    }
+
     randomSeed = Math.floor(Math.random() * 1000000);
     isMultiplayer = true;
-    myScoreLabel.innerText = "ฉัน";
-    opponentScoreContainer.classList.remove("hidden");
+
+    const myScoreLabelEl = document.getElementById("myScoreLabel");
+    if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
+
+    const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
+    if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
 
     // Reset ready states for the new match
     localInputReady = false;
@@ -700,8 +719,12 @@ startMultiplayerGameBtn.addEventListener("click", () => {
       toggleFullscreen();
     }
 
-    loadingOverlay.classList.remove("hidden");
-    document.querySelector("#loadingOverlay h3").innerText = "กำลังเตรียมกล้องเว็บแคมและโหลด AI...";
+    const loadingOverlayEl = document.getElementById("loadingOverlay");
+    if (loadingOverlayEl) {
+      loadingOverlayEl.classList.remove("hidden");
+      const loadingText = loadingOverlayEl.querySelector("h3");
+      if (loadingText) loadingText.innerText = "กำลังเตรียมกล้องเว็บแคมและโหลด AI...";
+    }
 
     switchPlayMode(gameMode).then(() => {
       localInputReady = true;
@@ -712,9 +735,12 @@ startMultiplayerGameBtn.addEventListener("click", () => {
       if (opponentInputReady) {
         triggerCountdown();
       } else {
-        // Keep loading overlay and show waiting message
-        loadingOverlay.classList.remove("hidden");
-        document.querySelector("#loadingOverlay h3").innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
+        const loadingOverlayEl2 = document.getElementById("loadingOverlay");
+        if (loadingOverlayEl2) {
+          loadingOverlayEl2.classList.remove("hidden");
+          const loadingText2 = loadingOverlayEl2.querySelector("h3");
+          if (loadingText2) loadingText2.innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
+        }
       }
     }).catch(() => {
       localInputReady = true;
@@ -725,11 +751,17 @@ startMultiplayerGameBtn.addEventListener("click", () => {
       if (opponentInputReady) {
         triggerCountdown();
       } else {
-        // Keep loading overlay and show waiting message
-        loadingOverlay.classList.remove("hidden");
-        document.querySelector("#loadingOverlay h3").innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
+        const loadingOverlayEl2 = document.getElementById("loadingOverlay");
+        if (loadingOverlayEl2) {
+          loadingOverlayEl2.classList.remove("hidden");
+          const loadingText2 = loadingOverlayEl2.querySelector("h3");
+          if (loadingText2) loadingText2.innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
+        }
       }
     });
+  } catch (err) {
+    console.error("Error in host start button click handler:", err);
+    alert("Host Click Error: " + err.message + "\nStack: " + err.stack);
   }
 });
 
