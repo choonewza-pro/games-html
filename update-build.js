@@ -39,8 +39,12 @@ try {
     const regex = /(id="build-version"[^>]*>)[^<]*/g;
     htmlContent = htmlContent.replace(regex, `$1Build: ${buildVersion}`);
     
+    // Auto-update script tags with cache-busting version query parameter (?v=nextCommitCount)
+    const scriptRegex = /(src="js\/[^"?]+)(\?v=[^"]*)?(")/g;
+    htmlContent = htmlContent.replace(scriptRegex, `$1?v=${nextCommitCount}$3`);
+    
     fs.writeFileSync(htmlPath, htmlContent, 'utf8');
-    console.log(`[Build System] Updated build version to: ${buildVersion}`);
+    console.log(`[Build System] Updated build version to: ${buildVersion} and applied cache-busting to script tags`);
   } else {
     console.error(`[Build System] File not found: ${htmlPath}`);
   }
