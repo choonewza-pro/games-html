@@ -239,13 +239,8 @@ canvas.addEventListener("touchend", () => {
   }
 });
 
-// Clean and exit to main menu
-function exitToMainMenu() {
-  if (gameActive) {
-    const confirmExit = confirm("คุณแน่ใจหรือไม่ว่าต้องการออกจากเกมในขณะนี้?");
-    if (!confirmExit) return;
-  }
-
+// Exit to the multiplayer lobby without disconnecting
+function exitToLobby() {
   gameActive = false;
   if (gameInterval) clearInterval(gameInterval);
 
@@ -254,12 +249,49 @@ function exitToMainMenu() {
     cameraInstance = null;
   }
 
-  if (isMultiplayer) {
-    leaveCurrentRoom();
+  // Hide gameplay UI
+  gameHud.classList.add("hidden");
+  gameOverModal.classList.add("hidden");
+  document.getElementById("guestPreStartOverlay").classList.add("hidden");
+  document.getElementById("countdownOverlay").classList.add("hidden");
+
+  // Show Lobby UI
+  menuView.classList.add("hidden");
+  multiplayerSetupView.classList.add("hidden");
+  roomLobbyView.classList.remove("hidden");
+  startScreenOverlay.classList.remove("hidden");
+
+  // Reset ready states for the next match
+  localInputReady = false;
+  opponentInputReady = false;
+
+  // Restore camera status UI
+  cameraStatus.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
+  cameraStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+}
+
+// Clean and exit to main menu
+function exitToMainMenu() {
+  if (gameActive) {
+    const confirmExit = confirm("คุณแน่ใจหรือไม่ว่าต้องการออกจากเกมในขณะนี้?");
+    if (!confirmExit) return;
   }
 
-  if (document.fullscreenElement) {
-    document.exitFullscreen().catch(() => {});
+  if (isMultiplayer) {
+    // Send message to opponent to also exit to lobby
+    if (networkConnection && networkConnection.open) {
+      networkConnection.send({ type: "exit-to-lobby" });
+    }
+    exitToLobby();
+    return;
+  }
+
+  gameActive = false;
+  if (gameInterval) clearInterval(gameInterval);
+
+  if (cameraInstance) {
+    cameraInstance.stop();
+    cameraInstance = null;
   }
 
   roomLobbyView.classList.add("hidden");

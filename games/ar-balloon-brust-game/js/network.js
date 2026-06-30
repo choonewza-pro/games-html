@@ -110,6 +110,11 @@ function setupConnectionListeners() {
       case "disconnect":
         handleOpponentDisconnect();
         break;
+
+      case "exit-to-lobby":
+        exitToLobby();
+        showTemporaryToast("คู่แข่งได้กดออกจากเกมกลับสู่ห้องล็อบบี้");
+        break;
     }
   });
 

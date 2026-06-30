@@ -532,5 +532,15 @@ function endGameSummary() {
     ? listPoppedIncorrect.map(w => `<button onclick="speakWord('${w}')" class="bg-rose-50 hover:bg-rose-100 active:scale-95 transition text-rose-800 text-xs px-2.5 py-1 rounded-lg font-semibold border border-rose-200 flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-volume-high text-[10px]"></i> ${w}</button>`).join('')
     : `<span class="text-xs text-emerald-600 italic font-semibold"><i class="fa-solid fa-circle-check"></i> เยี่ยมมาก! คุณไม่ได้เจาะผิดประเภทเลย</span>`;
 
+  // Dynamically update exit button text based on mode
+  const exitGameBtn = document.getElementById("exitGameBtn");
+  if (exitGameBtn) {
+    if (isMultiplayer) {
+      exitGameBtn.innerHTML = `<i class="fa-solid fa-door-open mr-1.5"></i> กลับห้องล็อบบี้`;
+    } else {
+      exitGameBtn.innerHTML = `<i class="fa-solid fa-house mr-1.5"></i> กลับหน้าหลัก`;
+    }
+  }
+
   gameOverModal.classList.remove("hidden");
 }
