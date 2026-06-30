@@ -126,7 +126,7 @@
       <div id="gameContainer" class="relative w-full aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl flex items-center justify-center">
         
         <!-- Game Metrics HUD Overlay -->
-        <div id="gameHud" class="absolute top-4 left-4 right-4 flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 px-4 rounded-2xl border-2 border-sky-100 shadow-lg z-10 pointer-events-auto">
+        <div id="gameHud" class="hidden absolute top-4 left-4 right-4 flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 px-4 rounded-2xl border-2 border-sky-100 shadow-lg z-10 pointer-events-auto">
           <!-- Player Score (Left) -->
           <div class="flex items-center gap-2">
             <div class="bg-amber-100 p-2 rounded-xl text-amber-600 flex items-center gap-1.5">
@@ -652,6 +652,7 @@
     const timerDisplay = document.getElementById("timerDisplay");
     const comboFeedback = document.getElementById("comboFeedback");
     const cameraStatus = document.getElementById("cameraStatus");
+    const gameHud = document.getElementById("gameHud");
     
     // Screens Overlays
     const startScreenOverlay = document.getElementById("startScreenOverlay");
@@ -1654,6 +1655,8 @@
       
       wordSettingsBtn.classList.remove("opacity-50", "cursor-not-allowed");
       wordSettingsBtn.disabled = false;
+
+      gameHud.classList.add("hidden");
     }
 
     quickRestartBtn.addEventListener("click", () => {
@@ -1693,6 +1696,8 @@
       opponentCombo = 0;
       balloonSeqId = 0;
       spawnTimer = 0;
+
+      gameHud.classList.remove("hidden");
 
       if (hudCombo) hudCombo.classList.add("hidden");
       if (opponentHudCombo) opponentHudCombo.classList.add("hidden");
@@ -2137,6 +2142,8 @@
       if (hudCombo) hudCombo.classList.add("hidden");
       if (opponentHudCombo) opponentHudCombo.classList.add("hidden");
       
+      gameHud.classList.add("hidden");
+      
       playSynthSound('gameover');
 
       finalScore.innerText = score;
@@ -2225,6 +2232,8 @@
       multiplayerSetupView.classList.add("hidden");
       menuView.classList.remove("hidden");
       startScreenOverlay.classList.remove("hidden");
+
+      gameHud.classList.add("hidden");
     });
   </script>
 </body>
