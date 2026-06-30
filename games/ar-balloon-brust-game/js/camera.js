@@ -2,6 +2,49 @@
 // INFRASTRUCTURE: MEDIAPIPE CAMERA & AI SERVICE
 // ==========================================
 
+let cameraStream = null;
+
+// Populate camera dropdown
+async function updateCameraList() {
+  const cameraSelect = document.getElementById("cameraSelect");
+  if (!cameraSelect) return;
+
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+    // Keep the default option
+    cameraSelect.innerHTML = '<option value="">-- กล้องเริ่มต้นของระบบ (Default) --</option>';
+
+    videoDevices.forEach((device, index) => {
+      const option = document.createElement("option");
+      option.value = device.deviceId;
+      option.text = device.label || `กล้องตัวที่ ${index + 1} (Camera ${index + 1})`;
+      cameraSelect.appendChild(option);
+    });
+
+    // Auto-select preferred camera if saved
+    const preferredId = localStorage.getItem("preferredCameraId");
+    if (preferredId && videoDevices.some(d => d.deviceId === preferredId)) {
+      cameraSelect.value = preferredId;
+    }
+  } catch (err) {
+    console.warn("Failed to enumerate camera devices:", err);
+  }
+}
+
+// Listen to camera selection changes
+document.addEventListener("DOMContentLoaded", () => {
+  const cameraSelect = document.getElementById("cameraSelect");
+  if (cameraSelect) {
+    cameraSelect.addEventListener("change", (e) => {
+      localStorage.setItem("preferredCameraId", e.target.value);
+    });
+  }
+  // Try to load cameras on start (might not have labels yet until permission is granted)
+  updateCameraList();
+});
+
 async function initCameraAndAI() {
   if (cameraInstance) return; 
 
@@ -11,8 +54,8 @@ async function initCameraAndAI() {
 
   try {
     // Prevent crashes if the CDN script failed to load or was blocked by an adblocker
-    if (typeof Hands === 'undefined' || typeof Camera === 'undefined') {
-      throw new Error("MediaPipe Hands or Camera library is not loaded. Please check your internet connection or disable adblockers.");
+    if (typeof Hands === 'undefined') {
+      throw new Error("MediaPipe Hands library is not loaded. Please check your internet connection or disable adblockers.");
     }
 
     handsDetector = new Hands({
@@ -28,29 +71,71 @@ async function initCameraAndAI() {
 
     handsDetector.onResults(onHandResults);
 
-    let lastHandDetectionTime = 0;
-    const DETECTION_THROTTLE_MS = 50; // Throttle to 20 FPS to reduce CPU/GPU load
-
-    cameraInstance = new Camera(videoElement, {
-      onFrame: async () => {
-        if (gameMode === "ai" && gameActive) {
-          const now = performance.now();
-          if (now - lastHandDetectionTime >= DETECTION_THROTTLE_MS) {
-            lastHandDetectionTime = now;
-            await handsDetector.send({ image: videoElement });
-          }
-        }
+    // Get camera constraints
+    const cameraSelect = document.getElementById("cameraSelect");
+    const selectedDeviceId = cameraSelect ? cameraSelect.value : localStorage.getItem("preferredCameraId");
+    
+    const constraints = {
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined
       },
-      width: 1280,
-      height: 720
+      audio: false
+    };
+
+    // Start camera stream manually
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    videoElement.srcObject = cameraStream;
+    
+    // Play video element
+    await new Promise((resolve, reject) => {
+      videoElement.onloadedmetadata = () => {
+        videoElement.play().then(resolve).catch(reject);
+      };
+      // Timeout fallback
+      setTimeout(() => resolve(), 3000);
     });
 
-    // Set a 5-second timeout for camera start to prevent getting stuck
-    const cameraStartPromise = cameraInstance.start();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Camera start timeout")), 5000)
-    );
-    await Promise.race([cameraStartPromise, timeoutPromise]);
+    // Refresh camera list now that permission is granted (so labels are visible)
+    await updateCameraList();
+
+    let isPlaying = true;
+    let lastHandDetectionTime = 0;
+    const DETECTION_THROTTLE_MS = 50; // 20 FPS
+
+    async function cameraFrameLoop() {
+      if (!isPlaying) return;
+      if (gameMode === "ai" && gameActive && videoElement.readyState === 4) {
+        const now = performance.now();
+        if (now - lastHandDetectionTime >= DETECTION_THROTTLE_MS) {
+          lastHandDetectionTime = now;
+          try {
+            await handsDetector.send({ image: videoElement });
+          } catch (e) {
+            console.warn("AI detection frame send failed:", e);
+          }
+        }
+      }
+      requestAnimationFrame(cameraFrameLoop);
+    }
+
+    // Start processing frames
+    cameraFrameLoop();
+
+    // Create cameraInstance interface to match the rest of the game code
+    cameraInstance = {
+      stop: () => {
+        isPlaying = false;
+        if (cameraStream) {
+          const tracks = cameraStream.getTracks();
+          tracks.forEach(track => track.stop());
+          cameraStream = null;
+        }
+        videoElement.srcObject = null;
+        cameraInstance = null;
+      }
+    };
     
     loadingOverlay.classList.add("hidden");
     cameraStatus.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
@@ -58,10 +143,19 @@ async function initCameraAndAI() {
   } catch (err) {
     console.error("Camera or AI initialization failed:", err);
     loadingOverlay.classList.add("hidden");
+    
+    // Cleanup if stream was partially started
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+    videoElement.srcObject = null;
+    cameraInstance = null;
+
     // Fallback to touch mode
     await switchPlayMode("touch");
     showTemporaryToast("ไม่สามารถเปิดใช้งานกล้องได้ เปลี่ยนเป็นโหมดสัมผัสให้คุณอัตโนมัติ!");
-    throw err; // Re-throw to be handled by the caller
+    throw err;
   }
 }
 
