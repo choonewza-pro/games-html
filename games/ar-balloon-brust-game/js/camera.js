@@ -3,6 +3,7 @@
 // ==========================================
 
 let cameraStream = null;
+let previewStream = null;
 
 // Populate camera dropdown
 async function updateCameraList() {
@@ -33,14 +34,116 @@ async function updateCameraList() {
   }
 }
 
-// Listen to camera selection changes
+// Start camera stream for preview modal
+async function startPreviewStream() {
+  const cameraSelect = document.getElementById("cameraSelect");
+  const cameraPreviewVideo = document.getElementById("cameraPreviewVideo");
+  const previewLoadingText = document.getElementById("previewLoadingText");
+  
+  if (!cameraPreviewVideo) return;
+
+  // Stop old preview stream if running
+  if (previewStream) {
+    previewStream.getTracks().forEach(track => track.stop());
+    previewStream = null;
+  }
+
+  if (previewLoadingText) {
+    previewLoadingText.innerText = "กำลังเชื่อมต่อกล้อง...";
+    previewLoadingText.classList.remove("hidden");
+  }
+
+  try {
+    const selectedDeviceId = cameraSelect ? cameraSelect.value : localStorage.getItem("preferredCameraId");
+    const constraints = {
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 360 },
+        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined
+      },
+      audio: false
+    };
+
+    previewStream = await navigator.mediaDevices.getUserMedia(constraints);
+    cameraPreviewVideo.srcObject = previewStream;
+    
+    cameraPreviewVideo.onloadedmetadata = () => {
+      cameraPreviewVideo.play().then(() => {
+        if (previewLoadingText) previewLoadingText.classList.add("hidden");
+      }).catch(err => {
+        console.warn("Preview video play failed:", err);
+      });
+    };
+
+    // Refresh the camera list to get labels if we just got permission
+    await updateCameraList();
+  } catch (err) {
+    console.warn("Failed to start camera preview:", err);
+    if (previewLoadingText) {
+      previewLoadingText.innerText = "ไม่สามารถเชื่อมต่อกล้องนี้ได้";
+      previewLoadingText.classList.remove("hidden");
+    }
+  }
+}
+
+// Stop preview stream
+function stopPreviewStream() {
+  const cameraPreviewVideo = document.getElementById("cameraPreviewVideo");
+  if (previewStream) {
+    previewStream.getTracks().forEach(track => track.stop());
+    previewStream = null;
+  }
+  if (cameraPreviewVideo) {
+    cameraPreviewVideo.srcObject = null;
+  }
+}
+
+// Listen to camera settings modal and selection changes
 document.addEventListener("DOMContentLoaded", () => {
   const cameraSelect = document.getElementById("cameraSelect");
-  if (cameraSelect) {
-    cameraSelect.addEventListener("change", (e) => {
-      localStorage.setItem("preferredCameraId", e.target.value);
+  const cameraSettingsBtn = document.getElementById("cameraSettingsBtn");
+  const closeCameraSettingsModalBtn = document.getElementById("closeCameraSettingsModalBtn");
+  const saveCameraSettingsBtn = document.getElementById("saveCameraSettingsBtn");
+  const cameraSettingsModal = document.getElementById("cameraSettingsModal");
+
+  if (cameraSettingsBtn && cameraSettingsModal) {
+    cameraSettingsBtn.addEventListener("click", () => {
+      cameraSettingsModal.classList.remove("hidden");
+      updateCameraList().then(() => {
+        startPreviewStream();
+      });
     });
   }
+
+  if (closeCameraSettingsModalBtn && cameraSettingsModal) {
+    closeCameraSettingsModalBtn.addEventListener("click", () => {
+      cameraSettingsModal.classList.add("hidden");
+      stopPreviewStream();
+    });
+  }
+
+  if (saveCameraSettingsBtn && cameraSettingsModal) {
+    saveCameraSettingsBtn.addEventListener("click", () => {
+      if (cameraSelect) {
+        localStorage.setItem("preferredCameraId", cameraSelect.value);
+      }
+      cameraSettingsModal.classList.add("hidden");
+      stopPreviewStream();
+      showTemporaryToast("บันทึกการตั้งค่ากล้องเว็บแคมสำเร็จ!");
+    });
+  }
+
+  if (cameraSelect) {
+    cameraSelect.addEventListener("change", () => {
+      if (cameraSelect.value) {
+        localStorage.setItem("preferredCameraId", cameraSelect.value);
+      } else {
+        localStorage.removeItem("preferredCameraId");
+      }
+      startPreviewStream();
+    });
+  }
+
   // Try to load cameras on start (might not have labels yet until permission is granted)
   updateCameraList();
 });

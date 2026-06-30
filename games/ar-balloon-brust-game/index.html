@@ -151,6 +151,9 @@
                 <button id="wordSettingsBtn" class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition duration-200 border border-white/10 flex items-center justify-center gap-1.5">
                   <i class="fa-solid fa-gear"></i> ตั้งค่าคำศัพท์และกติกา
                 </button>
+                <button id="cameraSettingsBtn" class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition duration-200 border border-white/10 flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-camera"></i> ตั้งค่ากล้องเว็บแคม
+                </button>
               </div>
 
               <!-- 2. Multiplayer Setup View -->
@@ -264,7 +267,7 @@
             </div>
 
             <p class="text-[10px] text-sky-200/80">รองรับคอมพิวเตอร์ แท็บเล็ต โทรศัพท์มือถือ และกระดานอัจฉริยะ (Interactive Whiteboard)</p>
-            <p id="build-version" class="text-[9px] text-sky-300/40 font-mono mt-1">Build: v1.0.51-20260630 (32be1e1)</p>
+            <p id="build-version" class="text-[9px] text-sky-300/40 font-mono mt-1">Build: v1.0.52-20260630 (532ab4e)</p>
           </div>
         </div>
 
@@ -412,14 +415,6 @@
                 </select>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-sky-600 mb-1">
-                  เลือกกล้องเว็บแคม (Select Webcam):
-                </label>
-                <select id="cameraSelect" class="w-full p-2 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none bg-white font-semibold text-slate-700">
-                  <option value="">-- กล้องเริ่มต้นของระบบ (Default) --</option>
-                </select>
-              </div>
 
               <div class="grid grid-cols-4 gap-2">
                 <div class="col-span-2">
@@ -483,6 +478,43 @@
 
             <div class="mt-4 flex gap-3">
               <button id="saveWordSettingsBtn" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-base rounded-xl transition shadow-md">
+                บันทึกการตั้งค่า
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Camera Settings Modal Dialog -->
+        <div id="cameraSettingsModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col justify-center items-center p-4 z-45 overflow-y-auto">
+          <div class="bg-white max-w-sm w-full rounded-3xl border-4 border-sky-400 p-6 shadow-2xl relative my-auto text-center">
+            <button id="closeCameraSettingsModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+              <i class="fa-solid fa-circle-xmark text-2xl"></i>
+            </button>
+
+            <h3 class="text-xl font-black text-sky-600 mb-3 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-camera"></i> ตั้งค่าเลือกกล้องเว็บแคม
+            </h3>
+
+            <div class="space-y-4 text-sm text-slate-600">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1 text-left">
+                  เลือกกล้องเว็บแคมที่ต้องการใช้งาน:
+                </label>
+                <select id="cameraSelect" class="w-full p-2.5 border-2 border-sky-100 rounded-xl text-xs focus:border-sky-400 focus:outline-none bg-white font-semibold text-slate-700">
+                  <option value="">-- กล้องเริ่มต้นของระบบ (Default) --</option>
+                </select>
+              </div>
+
+              <!-- Live Preview Container -->
+              <div class="space-y-1">
+                <span class="block text-[10px] font-bold text-slate-400 text-left">ภาพพรีวิวจากกล้อง (Live Preview):</span>
+                <div class="relative aspect-video w-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+                  <video id="cameraPreviewVideo" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                  <div id="previewLoadingText" class="absolute text-xs text-slate-400">กำลังเชื่อมต่อกล้อง...</div>
+                </div>
+              </div>
+
+              <button id="saveCameraSettingsBtn" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-extrabold rounded-2xl shadow-md transition">
                 บันทึกการตั้งค่า
               </button>
             </div>
@@ -563,13 +595,13 @@
   </div>
 
   <!-- Game Scripts in Clean Architecture Modules -->
-  <script src="js/state.js?v=51"></script>
-  <script src="js/data-ar-balloon-brust-game.js?v=51"></script>
-  <script src="js/audio.js?v=51"></script>
-  <script src="js/entities.js?v=51"></script>
-  <script src="js/network.js?v=51"></script>
-  <script src="js/camera.js?v=51"></script>
-  <script src="js/game.js?v=51"></script>
-  <script src="js/main.js?v=51"></script>
+  <script src="js/state.js?v=52"></script>
+  <script src="js/data-ar-balloon-brust-game.js?v=52"></script>
+  <script src="js/audio.js?v=52"></script>
+  <script src="js/entities.js?v=52"></script>
+  <script src="js/network.js?v=52"></script>
+  <script src="js/camera.js?v=52"></script>
+  <script src="js/game.js?v=52"></script>
+  <script src="js/main.js?v=52"></script>
 </body>
 </html>
