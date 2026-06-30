@@ -46,14 +46,21 @@ function setupConnectionListeners() {
         randomSeed = data.seed;
         matchMode = data.matchMode || "share";
         isMultiplayer = true;
-        myScoreLabel.innerText = "ฉัน";
-        opponentScoreContainer.classList.remove("hidden");
+        
+        const myScoreLabelEl = document.getElementById("myScoreLabel");
+        if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
+        
+        const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
+        if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
         
         localInputReady = false;
         opponentInputReady = false;
 
-        document.getElementById("guestPreStartOverlay").classList.remove("hidden");
-        startScreenOverlay.classList.add("hidden");
+        const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+        if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.remove("hidden");
+        
+        const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+        if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
         break;
 
       case "ready":
@@ -95,17 +102,23 @@ function setupConnectionListeners() {
           opponentMaxCombo = opponentCombo;
         }
         
-        if (opponentScore < 0) {
-          opponentScoreDisplay.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
-        } else {
-          opponentScoreDisplay.innerText = opponentScore.toString().padStart(3, '0');
+        const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
+        if (opponentScoreDisplayEl) {
+          if (opponentScore < 0) {
+            opponentScoreDisplayEl.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
+          } else {
+            opponentScoreDisplayEl.innerText = opponentScore.toString().padStart(3, '0');
+          }
         }
         
-        if (opponentCombo >= 3) {
-          opponentHudCombo.innerText = `COMBO x${opponentCombo}`;
-          opponentHudCombo.classList.remove("hidden");
-        } else {
-          opponentHudCombo.classList.add("hidden");
+        const opponentHudComboEl = document.getElementById("opponentHudCombo");
+        if (opponentHudComboEl) {
+          if (opponentCombo >= 3) {
+            opponentHudComboEl.innerText = `COMBO x${opponentCombo}`;
+            opponentHudComboEl.classList.remove("hidden");
+          } else {
+            opponentHudComboEl.classList.add("hidden");
+          }
         }
         break;
 
@@ -150,20 +163,37 @@ function handleOpponentDisconnect() {
   leaveCurrentRoom();
 
   // Ensure we go back to the very first main menu
-  roomLobbyView.classList.add("hidden");
-  multiplayerSetupView.classList.add("hidden");
-  menuView.classList.remove("hidden");
-  startScreenOverlay.classList.remove("hidden");
-  gameHud.classList.add("hidden");
+  const roomLobbyViewEl = document.getElementById("roomLobbyView");
+  if (roomLobbyViewEl) roomLobbyViewEl.classList.add("hidden");
+  
+  const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
+  if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.add("hidden");
+  
+  const menuViewEl = document.getElementById("menuView");
+  if (menuViewEl) menuViewEl.classList.remove("hidden");
+  
+  const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+  if (startScreenOverlayEl) startScreenOverlayEl.classList.remove("hidden");
+  
+  const gameHudEl = document.getElementById("gameHud");
+  if (gameHudEl) gameHudEl.classList.add("hidden");
 
   // Hide any active game overlays
-  document.getElementById("guestPreStartOverlay").classList.add("hidden");
-  document.getElementById("countdownOverlay").classList.add("hidden");
-  gameOverModal.classList.add("hidden");
+  const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+  if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
+  
+  const countdownOverlayEl = document.getElementById("countdownOverlay");
+  if (countdownOverlayEl) countdownOverlayEl.classList.add("hidden");
+  
+  const gameOverModalEl = document.getElementById("gameOverModal");
+  if (gameOverModalEl) gameOverModalEl.classList.add("hidden");
 
   // Reset camera status UI
-  cameraStatus.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
-  cameraStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+  const cameraStatusEl = document.getElementById("cameraStatus");
+  if (cameraStatusEl) {
+    cameraStatusEl.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
+    cameraStatusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+  }
 }
 
 function leaveCurrentRoom() {
@@ -185,16 +215,27 @@ function leaveCurrentRoom() {
 
   isMultiplayer = false;
   roomId = null;
-  opponentScoreContainer.classList.add("hidden");
-  roomStatusPanel.classList.add("hidden");
   
-  roomLobbyView.classList.add("hidden");
-  multiplayerSetupView.classList.remove("hidden");
+  const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
+  if (opponentScoreContainerEl) opponentScoreContainerEl.classList.add("hidden");
   
-  wordSettingsBtn.classList.remove("opacity-50", "cursor-not-allowed");
-  wordSettingsBtn.disabled = false;
+  const roomStatusPanelEl = document.getElementById("roomStatusPanel");
+  if (roomStatusPanelEl) roomStatusPanelEl.classList.add("hidden");
+  
+  const roomLobbyViewEl = document.getElementById("roomLobbyView");
+  if (roomLobbyViewEl) roomLobbyViewEl.classList.add("hidden");
+  
+  const multiplayerSetupViewEl = document.getElementById("multiplayerSetupView");
+  if (multiplayerSetupViewEl) multiplayerSetupViewEl.classList.remove("hidden");
+  
+  const wordSettingsBtnEl = document.getElementById("wordSettingsBtn");
+  if (wordSettingsBtnEl) {
+    wordSettingsBtnEl.classList.remove("opacity-50", "cursor-not-allowed");
+    wordSettingsBtnEl.disabled = false;
+  }
 
-  gameHud.classList.add("hidden");
+  const gameHudEl = document.getElementById("gameHud");
+  if (gameHudEl) gameHudEl.classList.add("hidden");
 }
 
 function setMatchMode(mode) {

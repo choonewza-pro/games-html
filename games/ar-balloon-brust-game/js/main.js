@@ -65,6 +65,7 @@ const opponentScoreContainer = document.getElementById("opponentScoreContainer")
 const opponentScoreDisplay = document.getElementById("opponentScoreDisplay");
 const opponentHudCombo = document.getElementById("opponentHudCombo");
 const hudCombo = document.getElementById("hudCombo");
+const myScoreLabel = document.getElementById("myScoreLabel");
 
 const roomStatusPanel = document.getElementById("roomStatusPanel");
 const localRoleBadge = document.getElementById("localRoleBadge");
