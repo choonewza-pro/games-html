@@ -231,8 +231,18 @@ function gameLoop(timestamp) {
         comboCount++;
         if (comboCount > maxCombo) maxCombo = comboCount;
         
-        const comboBonus = Math.min(5, Math.floor((comboCount - 1) / 3)) * 2;
-        const pointsGained = 10 + comboBonus;
+        // Progressive Combo Multiplier System
+        let pointsGained = 10;
+        if (comboCount >= 12) {
+          pointsGained = 30; // Combo x12 or more: +30 points
+        } else if (comboCount >= 9) {
+          pointsGained = 25; // Combo x9 - x11: +25 points
+        } else if (comboCount >= 6) {
+          pointsGained = 20; // Combo x6 - x8: +20 points
+        } else if (comboCount >= 3) {
+          pointsGained = 15; // Combo x3 - x5: +15 points
+        }
+        
         score += pointsGained;
         
         playSynthSound('popCorrect');
