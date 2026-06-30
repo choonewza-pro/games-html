@@ -4,6 +4,44 @@
 
 let lastOpponentHeartbeatTime = 0;
 let heartbeatInterval = null;
+let pingsSentCount = 0;
+let pingsRecvCount = 0;
+
+function updateDebugNetworkUI() {
+  const debugRole = document.getElementById("debugRole");
+  const debugConnState = document.getElementById("debugConnState");
+  const debugLastHb = document.getElementById("debugLastHb");
+  const debugPingSent = document.getElementById("debugPingSent");
+  const debugPingRecv = document.getElementById("debugPingRecv");
+  
+  if (debugRole) {
+    debugRole.innerText = "ROLE: " + myPlayerRole.toUpperCase();
+  }
+  
+  if (debugConnState) {
+    if (networkConnection) {
+      debugConnState.innerText = networkConnection.open ? "OPEN (Connected)" : "CLOSED (Disconnected)";
+      debugConnState.className = networkConnection.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+    } else {
+      debugConnState.innerText = "NULL (No connection)";
+      debugConnState.className = "text-rose-400 font-bold";
+    }
+  }
+  
+  if (debugLastHb) {
+    if (lastOpponentHeartbeatTime > 0) {
+      const sec = Math.floor((Date.now() - lastOpponentHeartbeatTime) / 1000);
+      debugLastHb.innerText = sec + "s ago";
+      debugLastHb.className = sec > 6 ? "text-rose-400 font-bold" : "text-emerald-400";
+    } else {
+      debugLastHb.innerText = "Never";
+      debugLastHb.className = "text-slate-500";
+    }
+  }
+  
+  if (debugPingSent) debugPingSent.innerText = pingsSentCount;
+  if (debugPingRecv) debugPingRecv.innerText = pingsRecvCount;
+}
 
 // Set up WebRTC DataChannel Listeners
 function setupConnectionListeners() {
@@ -11,13 +49,18 @@ function setupConnectionListeners() {
 
   // Initialize heartbeat state
   lastOpponentHeartbeatTime = Date.now();
+  pingsSentCount = 0;
+  pingsRecvCount = 0;
   if (heartbeatInterval) clearInterval(heartbeatInterval);
+  
+  updateDebugNetworkUI();
   
   heartbeatInterval = setInterval(() => {
     // 1. Send ping if connection is open
     if (networkConnection && networkConnection.open) {
       try {
         networkConnection.send({ type: "ping" });
+        pingsSentCount++;
       } catch (e) {
         console.warn("Heartbeat send failed:", e);
       }
@@ -31,6 +74,8 @@ function setupConnectionListeners() {
         handleOpponentDisconnect();
       }
     }
+    
+    updateDebugNetworkUI();
   }, 3000);
 
   networkConnection.on("data", (data) => {
@@ -44,7 +89,8 @@ function setupConnectionListeners() {
 
       switch (data.type) {
         case "ping":
-          // Heartbeat ping received, just update the timestamp (already done above)
+          pingsRecvCount++;
+          updateDebugNetworkUI();
           break;
         case "init":
           GAME_TITLE = data.settings.title;
@@ -291,6 +337,10 @@ function leaveCurrentRoom() {
 
   const gameHudEl = document.getElementById("gameHud");
   if (gameHudEl) gameHudEl.classList.add("hidden");
+
+  pingsSentCount = 0;
+  pingsRecvCount = 0;
+  updateDebugNetworkUI();
 }
 
 function setMatchMode(mode) {
