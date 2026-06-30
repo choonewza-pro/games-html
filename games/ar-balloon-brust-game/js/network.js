@@ -91,6 +91,9 @@ function setupConnectionListeners() {
       case "score":
         opponentScore = data.score;
         opponentCombo = data.combo;
+        if (opponentCombo > opponentMaxCombo) {
+          opponentMaxCombo = opponentCombo;
+        }
         opponentScoreDisplay.innerText = opponentScore.toString().padStart(3, '0');
         
         if (opponentCombo >= 3) {

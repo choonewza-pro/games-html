@@ -321,22 +321,40 @@
             <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">สรุปผลการประเมินทักษะของคุณ</p>
 
             <!-- Multiplayer VS Scoreboard -->
-            <div id="multiplayerScoreboard" class="hidden my-4 bg-gradient-to-r from-sky-50 to-indigo-50 p-4 rounded-2xl border border-sky-100 flex justify-around items-center gap-4">
-              <div class="flex-grow text-center">
-                <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คะแนนของคุณ</span>
-                <span id="mpPlayerScore" class="text-4xl font-black text-emerald-600">0</span>
+            <div id="multiplayerScoreboard" class="hidden my-4 space-y-3">
+              <!-- Score Row -->
+              <div class="bg-gradient-to-r from-sky-50 to-indigo-50 p-3.5 rounded-2xl border border-sky-100 flex justify-around items-center gap-4">
+                <div class="flex-grow text-center w-1/3">
+                  <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คะแนนของคุณ</span>
+                  <span id="mpPlayerScore" class="text-3xl font-black text-emerald-600">0</span>
+                </div>
+                <div class="bg-indigo-500 text-white font-black px-3 py-1 rounded-full text-[10px] shadow-md tracking-wider">
+                  คะแนนรวม
+                </div>
+                <div class="flex-grow text-center w-1/3">
+                  <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คะแนนคู่แข่ง</span>
+                  <span id="mpOpponentScore" class="text-3xl font-black text-rose-500">0</span>
+                </div>
               </div>
-              <div class="bg-indigo-500 text-white font-black px-3 py-1.5 rounded-full text-xs shadow-md tracking-wider transform rotate-12">
-                VS
-              </div>
-              <div class="flex-grow text-center">
-                <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คะแนนคู่แข่ง</span>
-                <span id="mpOpponentScore" class="text-4xl font-black text-rose-500">0</span>
+              
+              <!-- Combo Row -->
+              <div class="bg-gradient-to-r from-sky-50 to-indigo-50 p-3.5 rounded-2xl border border-sky-100 flex justify-around items-center gap-4">
+                <div class="flex-grow text-center w-1/3">
+                  <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คอมโบของคุณ</span>
+                  <span id="mpPlayerCombo" class="text-3xl font-black text-emerald-600">0</span>
+                </div>
+                <div class="bg-rose-500 text-white font-black px-3 py-1 rounded-full text-[10px] shadow-md tracking-wider">
+                  คอมโบสูงสุด
+                </div>
+                <div class="flex-grow text-center w-1/3">
+                  <span class="text-[10px] text-slate-400 font-extrabold block uppercase">คอมโบคู่แข่ง</span>
+                  <span id="mpOpponentCombo" class="text-3xl font-black text-rose-500">0</span>
+                </div>
               </div>
             </div>
 
             <!-- Score & Statistics Grid -->
-            <div class="grid grid-cols-3 gap-2.5 my-4">
+            <div id="singleplayerStats" class="grid grid-cols-3 gap-2.5 my-4">
               <div class="bg-sky-50 p-2.5 rounded-2xl border border-sky-100">
                 <span class="text-[9px] text-slate-400 font-bold block uppercase mb-0.5">คะแนนที่ทำได้</span>
                 <span id="finalScore" class="text-2xl font-black text-sky-600">0</span>

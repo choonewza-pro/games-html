@@ -56,6 +56,7 @@ function startGameplay() {
   maxCombo = 0;
   opponentScore = 0;
   opponentCombo = 0;
+  opponentMaxCombo = 0;
   balloonSeqId = 0;
   spawnTimer = 0;
 
@@ -501,28 +502,50 @@ function endGameSummary() {
   let rankColor = "text-amber-700";
   
   const mpScoreboard = document.getElementById("multiplayerScoreboard");
+  const spStats = document.getElementById("singleplayerStats");
   
   if (isMultiplayer) {
-    // Show VS Scoreboard and populate data
+    // Hide singleplayer stats and show VS Scoreboard
+    if (spStats) spStats.classList.add("hidden");
     if (mpScoreboard) {
       mpScoreboard.classList.remove("hidden");
+      
       const mpPlayerScore = document.getElementById("mpPlayerScore");
       const mpOpponentScore = document.getElementById("mpOpponentScore");
+      const mpPlayerCombo = document.getElementById("mpPlayerCombo");
+      const mpOpponentCombo = document.getElementById("mpOpponentCombo");
       
       if (mpPlayerScore && mpOpponentScore) {
         mpPlayerScore.innerText = score;
         mpOpponentScore.innerText = opponentScore;
         
-        // Color coding: green for winner, red for loser, blue for tie
+        // Color coding for Scores: green for winner, red for loser, blue/indigo for tie
         if (score > opponentScore) {
-          mpPlayerScore.className = "text-4xl font-black text-emerald-600 animate-pulse";
-          mpOpponentScore.className = "text-4xl font-black text-rose-400";
+          mpPlayerScore.className = "text-3xl font-black text-emerald-600 animate-pulse";
+          mpOpponentScore.className = "text-3xl font-black text-rose-400";
         } else if (score < opponentScore) {
-          mpPlayerScore.className = "text-4xl font-black text-rose-400";
-          mpOpponentScore.className = "text-4xl font-black text-emerald-600 animate-pulse";
+          mpPlayerScore.className = "text-3xl font-black text-rose-400";
+          mpOpponentScore.className = "text-3xl font-black text-emerald-600 animate-pulse";
         } else {
-          mpPlayerScore.className = "text-4xl font-black text-indigo-500";
-          mpOpponentScore.className = "text-4xl font-black text-indigo-500";
+          mpPlayerScore.className = "text-3xl font-black text-indigo-500";
+          mpOpponentScore.className = "text-3xl font-black text-indigo-500";
+        }
+      }
+
+      if (mpPlayerCombo && mpOpponentCombo) {
+        mpPlayerCombo.innerText = maxCombo;
+        mpOpponentCombo.innerText = opponentMaxCombo;
+
+        // Color coding for Max Combos: green for higher, red for lower, blue/indigo for tie
+        if (maxCombo > opponentMaxCombo) {
+          mpPlayerCombo.className = "text-3xl font-black text-emerald-600";
+          mpOpponentCombo.className = "text-3xl font-black text-rose-400";
+        } else if (maxCombo < opponentMaxCombo) {
+          mpPlayerCombo.className = "text-3xl font-black text-rose-400";
+          mpOpponentCombo.className = "text-3xl font-black text-emerald-600";
+        } else {
+          mpPlayerCombo.className = "text-3xl font-black text-indigo-500";
+          mpOpponentCombo.className = "text-3xl font-black text-indigo-500";
         }
       }
     }
@@ -541,7 +564,8 @@ function endGameSummary() {
       rankColor = "text-indigo-500";
     }
   } else {
-    // Hide VS Scoreboard for singleplayer
+    // Show singleplayer stats and hide VS Scoreboard
+    if (spStats) spStats.classList.remove("hidden");
     if (mpScoreboard) {
       mpScoreboard.classList.add("hidden");
     }

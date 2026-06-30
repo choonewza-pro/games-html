@@ -83,6 +83,7 @@ let myPlayerRole = "host";
 let roomId = null;
 let opponentScore = 0;
 let opponentCombo = 0;
+let opponentMaxCombo = 0;
 let opponentPointer = { x: -100, y: -100, active: false };
 let opponentTargetPointer = { x: -100, y: -100 };
 let matchMode = "share"; // v3: "share" (แย่งกันเจาะ) or "individual" (ต่างคนต่างเจาะ)
