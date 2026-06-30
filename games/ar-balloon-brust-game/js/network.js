@@ -309,10 +309,6 @@ function handleOpponentDisconnect() {
     cameraInstance = null;
   }
 
-  if (document.fullscreenElement) {
-    document.exitFullscreen().catch(() => {});
-  }
-
   // Clear heartbeat interval
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval);
