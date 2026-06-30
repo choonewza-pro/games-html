@@ -11,6 +11,38 @@ const GAME_TEMPLATES = {
     incorrectCatName: "คำไม่ประวิสรรชนีย์",
     praWords: ["มะม่วง", "มะพร้าว", "มะละกอ", "มะเขือ", "มะนาว", "กะทิ", "กะปิ", "กะละมัง", "ตะกร้า", "ตะวัน", "สะพาน", "สะอาด", "สะดวก", "สะกด", "ชะนี", "ชะอม", "ทะเล", "ทะนุถนอม", "พระอาทิตย์", "ระฆัง"],
     nonPraWords: ["ตลาด", "ขนม", "ถนน", "สบาย", "สมัคร", "สมุด", "ผลิต", "ขยาย", "ฉลาด", "แสดง"]
+  },
+  eng_verbs: {
+    title: "English Verbs Challenge",
+    mission: "Pop only the balloons containing English VERBS (action words)!",
+    correctCatName: "English Verbs",
+    incorrectCatName: "Nouns or Adjectives",
+    praWords: ["run", "jump", "swim", "walk", "read", "write", "speak", "listen", "eat", "drink", "sleep", "play", "sing", "dance", "fly", "drive", "cook", "build", "think", "learn"],
+    nonPraWords: ["apple", "happy", "beautiful", "table", "house", "green", "quick", "doctor", "car", "book", "sky", "chair", "river", "mountain", "smart"]
+  },
+  eng_body_parts: {
+    title: "Body Parts Challenge",
+    mission: "Pop only the balloons containing human BODY PARTS!",
+    correctCatName: "Body Parts",
+    incorrectCatName: "Other Words",
+    praWords: ["head", "hair", "eye", "ear", "nose", "mouth", "teeth", "neck", "shoulder", "arm", "elbow", "hand", "finger", "chest", "stomach", "leg", "knee", "foot", "toe", "brain"],
+    nonPraWords: ["pencil", "computer", "bicycle", "window", "tree", "dog", "bottle", "shoe", "shirt", "spoon", "clock", "flower", "bread", "paper"]
+  },
+  math_addition: {
+    title: "Math Addition Challenge",
+    mission: "Pop only the balloons with CORRECT math addition equations!",
+    correctCatName: "Correct Equations",
+    incorrectCatName: "Incorrect Equations",
+    praWords: ["5+3=8", "2+2=4", "10+5=15", "7+4=11", "6+6=12", "8+2=10", "1+9=10", "4+3=7", "9+5=14", "3+5=8", "12+4=16", "15+5=20", "7+7=14", "9+9=18", "11+2=13"],
+    nonPraWords: ["5+3=9", "2+2=5", "10+5=14", "7+4=12", "6+6=11", "8+2=9", "1+9=8", "4+3=8", "9+5=13", "3+5=7"]
+  },
+  sci_plant_parts: {
+    title: "ส่วนประกอบของพืช Challenge",
+    mission: "จงใช้ \"นิ้วชี้\" ของคุณผ่านกล้อง หรือใช้ \"นิ้วแตะหน้าจอ/เมาส์\" แตะเฉพาะลูกโป่งที่เป็น ส่วนประกอบของพืช เท่านั้น!",
+    correctCatName: "ส่วนประกอบของพืช",
+    incorrectCatName: "ส่วนประกอบของสัตว์หรืออื่นๆ",
+    praWords: ["ราก", "ลำต้น", "ใบ", "ดอก", "ผล", "เมล็ด", "กลีบดอก", "เกสร", "กิ่งก้าน", "หน่อ", "เปลือกไม้", "คลอโรฟิลล์"],
+    nonPraWords: ["ปีก", "หาง", "ขนนก", "เขา", "เปลือกหอย", "ปากนก", "ขนสัตว์", "อุ้งเท้า", "กรงเล็บ", "ล้อรถ", "เครื่องยนต์", "พลาสติก"]
   }
 };
 
