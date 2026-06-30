@@ -635,6 +635,10 @@ startMultiplayerGameBtn.addEventListener("click", () => {
     myScoreLabel.innerText = "ฉัน";
     opponentScoreContainer.classList.remove("hidden");
 
+    // Reset ready states for the new match
+    localInputReady = false;
+    opponentInputReady = false;
+
     networkConnection.send({
       type: "pre_start",
       seed: randomSeed,
@@ -651,11 +655,19 @@ startMultiplayerGameBtn.addEventListener("click", () => {
 
     switchPlayMode(gameMode).then(() => {
       localInputReady = true;
+      // Send ready signal to the guest
+      if (networkConnection && networkConnection.open) {
+        networkConnection.send({ type: "ready" });
+      }
       if (opponentInputReady) {
         triggerCountdown();
       }
     }).catch(() => {
       localInputReady = true;
+      // Send ready signal even if camera fails (falls back to touch)
+      if (networkConnection && networkConnection.open) {
+        networkConnection.send({ type: "ready" });
+      }
       if (opponentInputReady) {
         triggerCountdown();
       }
