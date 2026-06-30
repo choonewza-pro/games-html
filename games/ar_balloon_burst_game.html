@@ -157,6 +157,9 @@
             <button id="quickRestartBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white shadow-md" title="เริ่มเกมใหม่ทันที">
               <i class="fa-solid fa-arrows-rotate"></i> เริ่มใหม่
             </button>
+            <button id="exitGameplayBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white shadow-md" title="กลับหน้าแรก">
+              <i class="fa-solid fa-house"></i> กลับหน้าแรก
+            </button>
           </div>
 
           <!-- Opponent Score (Multiplayer Only) & Timer -->
@@ -710,6 +713,7 @@
     const gameOverModal = document.getElementById("gameOverModal");
     const retryGameBtn = document.getElementById("retryGameBtn");
     const exitGameBtn = document.getElementById("exitGameBtn");
+    const exitGameplayBtn = document.getElementById("exitGameplayBtn");
     const resumeGameBtn = document.getElementById("resumeGameBtn");
     const gameContainer = document.getElementById("gameContainer");
     const fullscreenBtn = document.getElementById("fullscreenBtn");
@@ -1797,6 +1801,43 @@
       gameHud.classList.add("hidden");
     }
 
+    function exitToMainMenu() {
+      // Prompt for confirmation during active gameplay
+      if (gameActive) {
+        const confirmExit = confirm(isMultiplayer 
+          ? "คุณกำลังอยู่ในการแข่งขันออนไลน์ การออกจะทำให้ขาดการเชื่อมต่อและยุติเกมทันที ต้องการออกใช่หรือไม่?"
+          : "ต้องการออกจากการเล่นเกมกลับสู่หน้าหลักใช่หรือไม่?"
+        );
+        if (!confirmExit) return;
+      }
+
+      gameActive = false;
+      if (gameInterval) clearInterval(gameInterval);
+      if (cameraInstance) {
+        cameraInstance.stop();
+        cameraInstance = null;
+      }
+
+      if (isMultiplayer) {
+        leaveCurrentRoom();
+      }
+
+      // Exit fullscreen if active
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+
+      roomLobbyView.classList.add("hidden");
+      multiplayerSetupView.classList.add("hidden");
+      menuView.classList.remove("hidden");
+      startScreenOverlay.classList.remove("hidden");
+      gameHud.classList.add("hidden");
+      
+      // Reset camera status UI
+      cameraStatus.className = "flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700";
+      cameraStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>ระบบพร้อมใช้งาน</span>`;
+    }
+
     quickRestartBtn.addEventListener("click", () => {
       if (isMultiplayer) {
         if (myPlayerRole === "host") {
@@ -2432,19 +2473,11 @@
       }
     });
 
+    exitGameplayBtn.addEventListener("click", exitToMainMenu);
+
     exitGameBtn.addEventListener("click", () => {
       gameOverModal.classList.add("hidden");
-      
-      if (isMultiplayer) {
-        leaveCurrentRoom();
-      }
-      
-      roomLobbyView.classList.add("hidden");
-      multiplayerSetupView.classList.add("hidden");
-      menuView.classList.remove("hidden");
-      startScreenOverlay.classList.remove("hidden");
-
-      gameHud.classList.add("hidden");
+      exitToMainMenu();
     });
   </script>
 </body>
