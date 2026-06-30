@@ -638,26 +638,31 @@ submitJoinRoomBtn.addEventListener("click", () => {
     myPlayerRole = "guest";
 
     networkConnection.on("open", () => {
-      loadingOverlay.classList.add("hidden");
-      multiplayerSetupView.classList.add("hidden");
-      roomLobbyView.classList.remove("hidden");
-      
-      lobbyRoomCode.innerText = targetId;
-      startMultiplayerGameBtn.classList.add("hidden"); 
-      guestWaitMsg.classList.remove("hidden");
-      
-      lobbyHostName.innerText = "หัวหน้าห้อง (เชื่อมต่อแล้ว)";
-      lobbyGuestName.innerText = "คุณ (ผู้ท้าชิง)";
-      lobbyGuestName.className = "text-sky-300 font-bold";
+      try {
+        loadingOverlay.classList.add("hidden");
+        multiplayerSetupView.classList.add("hidden");
+        roomLobbyView.classList.remove("hidden");
+        
+        lobbyRoomCode.innerText = targetId;
+        startMultiplayerGameBtn.classList.add("hidden"); 
+        guestWaitMsg.classList.remove("hidden");
+        
+        lobbyHostName.innerText = "หัวหน้าห้อง (เชื่อมต่อแล้ว)";
+        lobbyGuestName.innerText = "คุณ (ผู้ท้าชิง)";
+        lobbyGuestName.className = "text-sky-300 font-bold";
 
-      wordSettingsBtn.classList.add("opacity-50", "cursor-not-allowed");
-      wordSettingsBtn.disabled = true;
+        wordSettingsBtn.classList.add("opacity-50", "cursor-not-allowed");
+        wordSettingsBtn.disabled = true;
 
-      localRoleBadge.innerText = "ผู้ท้าชิง (Guest)";
-      localRoomIdBadge.innerText = targetId;
-      roomStatusPanel.classList.remove("hidden");
-      
-      setupConnectionListeners();
+        localRoleBadge.innerText = "ผู้ท้าชิง (Guest)";
+        localRoomIdBadge.innerText = targetId;
+        roomStatusPanel.classList.remove("hidden");
+        
+        setupConnectionListeners();
+      } catch (err) {
+        console.error("Error in guest network connection open handler:", err);
+        alert("Guest Connection Open Error: " + err.message + "\nStack: " + err.stack);
+      }
     });
   });
 

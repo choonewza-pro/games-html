@@ -8,229 +8,242 @@ let pingsSentCount = 0;
 let pingsRecvCount = 0;
 
 function updateDebugNetworkUI() {
-  const debugRole = document.getElementById("debugRole");
-  const debugConnState = document.getElementById("debugConnState");
-  const debugLastHb = document.getElementById("debugLastHb");
-  const debugPingSent = document.getElementById("debugPingSent");
-  const debugPingRecv = document.getElementById("debugPingRecv");
-  
-  if (debugRole) {
-    debugRole.innerText = "ROLE: " + myPlayerRole.toUpperCase();
-  }
-  
-  if (debugConnState) {
-    if (networkConnection) {
-      debugConnState.innerText = networkConnection.open ? "OPEN (Connected)" : "CLOSED (Disconnected)";
-      debugConnState.className = networkConnection.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
-    } else {
-      debugConnState.innerText = "NULL (No connection)";
-      debugConnState.className = "text-rose-400 font-bold";
+  try {
+    const debugRole = document.getElementById("debugRole");
+    const debugConnState = document.getElementById("debugConnState");
+    const debugLastHb = document.getElementById("debugLastHb");
+    const debugPingSent = document.getElementById("debugPingSent");
+    const debugPingRecv = document.getElementById("debugPingRecv");
+    
+    if (debugRole) {
+      debugRole.innerText = "ROLE: " + (myPlayerRole ? myPlayerRole.toUpperCase() : "UNKNOWN");
     }
-  }
-  
-  if (debugLastHb) {
-    if (lastOpponentHeartbeatTime > 0) {
-      const sec = Math.floor((Date.now() - lastOpponentHeartbeatTime) / 1000);
-      debugLastHb.innerText = sec + "s ago";
-      debugLastHb.className = sec > 6 ? "text-rose-400 font-bold" : "text-emerald-400";
-    } else {
-      debugLastHb.innerText = "Never";
-      debugLastHb.className = "text-slate-500";
+    
+    if (debugConnState) {
+      if (networkConnection) {
+        debugConnState.innerText = networkConnection.open ? "OPEN (Connected)" : "CLOSED (Disconnected)";
+        debugConnState.className = networkConnection.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+      } else {
+        debugConnState.innerText = "NULL (No connection)";
+        debugConnState.className = "text-rose-400 font-bold";
+      }
     }
+    
+    if (debugLastHb) {
+      if (lastOpponentHeartbeatTime > 0) {
+        const sec = Math.floor((Date.now() - lastOpponentHeartbeatTime) / 1000);
+        debugLastHb.innerText = sec + "s ago";
+        debugLastHb.className = sec > 6 ? "text-rose-400 font-bold" : "text-emerald-400";
+      } else {
+        debugLastHb.innerText = "Never";
+        debugLastHb.className = "text-slate-500";
+      }
+    }
+    
+    if (debugPingSent) debugPingSent.innerText = pingsSentCount;
+    if (debugPingRecv) debugPingRecv.innerText = pingsRecvCount;
+  } catch (err) {
+    console.error("Error in updateDebugNetworkUI:", err);
   }
-  
-  if (debugPingSent) debugPingSent.innerText = pingsSentCount;
-  if (debugPingRecv) debugPingRecv.innerText = pingsRecvCount;
 }
 
 // Set up WebRTC DataChannel Listeners
 function setupConnectionListeners() {
-  if (!networkConnection) return;
+  try {
+    if (!networkConnection) return;
 
-  // Initialize heartbeat state
-  lastOpponentHeartbeatTime = Date.now();
-  pingsSentCount = 0;
-  pingsRecvCount = 0;
-  if (heartbeatInterval) clearInterval(heartbeatInterval);
-  
-  updateDebugNetworkUI();
-  
-  heartbeatInterval = setInterval(() => {
-    // 1. Send ping if connection is open
-    if (networkConnection && networkConnection.open) {
-      try {
-        networkConnection.send({ type: "ping" });
-        pingsSentCount++;
-      } catch (e) {
-        console.warn("Heartbeat send failed:", e);
-      }
-    }
-    
-    // 2. Check for connection loss or timeout (outside the .open check!)
-    if (networkConnection) {
-      const timeSinceLastHeartbeat = Date.now() - lastOpponentHeartbeatTime;
-      if (!networkConnection.open || timeSinceLastHeartbeat > 15000) {
-        console.warn("Connection closed or heartbeat timeout. Disconnecting.");
-        handleOpponentDisconnect();
-      }
-    }
+    // Initialize heartbeat state
+    lastOpponentHeartbeatTime = Date.now();
+    pingsSentCount = 0;
+    pingsRecvCount = 0;
+    if (heartbeatInterval) clearInterval(heartbeatInterval);
     
     updateDebugNetworkUI();
-  }, 3000);
-
-  networkConnection.on("data", (data) => {
-    try {
-      // Update heartbeat timestamp on any message received
-      lastOpponentHeartbeatTime = Date.now();
-
-      if (data.type !== "ping" && data.type !== "pointer") {
-        showTemporaryToast("[Debug] Received: " + data.type);
+    
+    heartbeatInterval = setInterval(() => {
+      try {
+        // 1. Send ping if connection is open
+        if (networkConnection && networkConnection.open) {
+          try {
+            networkConnection.send({ type: "ping" });
+            pingsSentCount++;
+          } catch (e) {
+            console.warn("Heartbeat send failed:", e);
+          }
+        }
+        
+        // 2. Check for connection loss or timeout (outside the .open check!)
+        if (networkConnection) {
+          const timeSinceLastHeartbeat = Date.now() - lastOpponentHeartbeatTime;
+          if (!networkConnection.open || timeSinceLastHeartbeat > 15000) {
+            console.warn("Connection closed or heartbeat timeout. Disconnecting.");
+            handleOpponentDisconnect();
+          }
+        }
+        
+        updateDebugNetworkUI();
+      } catch (innerErr) {
+        console.error("Error in heartbeat interval:", innerErr);
       }
+    }, 3000);
 
-      switch (data.type) {
-        case "ping":
-          pingsRecvCount++;
-          updateDebugNetworkUI();
-          break;
-        case "init":
-          GAME_TITLE = data.settings.title;
-          GAME_MISSION = data.settings.mission;
-          CORRECT_CAT_NAME = data.settings.correctCatName;
-          INCORRECT_CAT_NAME = data.settings.incorrectCatName;
-          PRA_WORDS = data.settings.praWords;
-          NON_PRA_WORDS = data.settings.nonPraWords;
-          gameDuration = data.settings.duration;
-          gameSpeed = data.settings.speed;
-          randomSeed = data.seed;
-          matchMode = data.matchMode || "share";
-          updateGameUI();
-          updateMatchModeUI();
-          break;
+    networkConnection.on("data", (data) => {
+      try {
+        // Update heartbeat timestamp on any message received
+        lastOpponentHeartbeatTime = Date.now();
 
-        case "settings":
-          GAME_TITLE = data.settings.title;
-          GAME_MISSION = data.settings.mission;
-          CORRECT_CAT_NAME = data.settings.correctCatName;
-          INCORRECT_CAT_NAME = data.settings.incorrectCatName;
-          PRA_WORDS = data.settings.praWords;
-          NON_PRA_WORDS = data.settings.nonPraWords;
-          gameDuration = data.settings.duration;
-          gameSpeed = data.settings.speed;
-          updateGameUI();
-          break;
+        if (data.type !== "ping" && data.type !== "pointer") {
+          showTemporaryToast("[Debug] Received: " + data.type);
+        }
 
-        case "matchModeChange":
-          // Host changed match mode in lobby
-          matchMode = data.mode;
-          updateMatchModeUI();
-          showTemporaryToast("หัวหน้าห้องเปลี่ยนกติกาการแข่งเป็น: " + (matchMode === "share" ? "แย่งกันเจาะ" : "ต่างคนต่างเจาะ"));
-          break;
+        switch (data.type) {
+          case "ping":
+            pingsRecvCount++;
+            updateDebugNetworkUI();
+            break;
+          case "init":
+            GAME_TITLE = data.settings.title;
+            GAME_MISSION = data.settings.mission;
+            CORRECT_CAT_NAME = data.settings.correctCatName;
+            INCORRECT_CAT_NAME = data.settings.incorrectCatName;
+            PRA_WORDS = data.settings.praWords;
+            NON_PRA_WORDS = data.settings.nonPraWords;
+            gameDuration = data.settings.duration;
+            gameSpeed = data.settings.speed;
+            randomSeed = data.seed;
+            matchMode = data.matchMode || "share";
+            updateGameUI();
+            updateMatchModeUI();
+            break;
 
-        case "pre_start":
-          randomSeed = data.seed;
-          matchMode = data.matchMode || "share";
-          gameMode = data.gameMode || "ai";
-          isMultiplayer = true;
-          
-          const myScoreLabelEl = document.getElementById("myScoreLabel");
-          if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
-          
-          const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
-          if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
-          
-          localInputReady = false;
-          opponentInputReady = false;
+          case "settings":
+            GAME_TITLE = data.settings.title;
+            GAME_MISSION = data.settings.mission;
+            CORRECT_CAT_NAME = data.settings.correctCatName;
+            INCORRECT_CAT_NAME = data.settings.incorrectCatName;
+            PRA_WORDS = data.settings.praWords;
+            NON_PRA_WORDS = data.settings.nonPraWords;
+            gameDuration = data.settings.duration;
+            gameSpeed = data.settings.speed;
+            updateGameUI();
+            break;
 
-          const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
-          if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.remove("hidden");
-          
-          const startScreenOverlayEl = document.getElementById("startScreenOverlay");
-          if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
-          break;
+          case "matchModeChange":
+            // Host changed match mode in lobby
+            matchMode = data.mode;
+            updateMatchModeUI();
+            showTemporaryToast("หัวหน้าห้องเปลี่ยนกติกาการแข่งเป็น: " + (matchMode === "share" ? "แย่งกันเจาะ" : "ต่างคนต่างเจาะ"));
+            break;
 
-        case "ready":
-          opponentInputReady = true;
-          if (localInputReady) {
-            triggerCountdown();
-          }
-          break;
+          case "pre_start":
+            randomSeed = data.seed;
+            matchMode = data.matchMode || "share";
+            gameMode = data.gameMode || "ai";
+            isMultiplayer = true;
+            
+            const myScoreLabelEl = document.getElementById("myScoreLabel");
+            if (myScoreLabelEl) myScoreLabelEl.innerText = "ฉัน";
+            
+            const opponentScoreContainerEl = document.getElementById("opponentScoreContainer");
+            if (opponentScoreContainerEl) opponentScoreContainerEl.classList.remove("hidden");
+            
+            localInputReady = false;
+            opponentInputReady = false;
 
-        case "pointer":
-          opponentTargetPointer.x = data.x;
-          opponentTargetPointer.y = data.y;
-          if (!opponentPointer.active && data.active) {
-            opponentPointer.x = data.x;
-            opponentPointer.y = data.y;
-          }
-          opponentPointer.active = data.active;
-          break;
+            const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+            if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.remove("hidden");
+            
+            const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+            if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
+            break;
 
-        case "pop":
-          // Only relevant in "share" mode
-          if (matchMode === "share") {
-            const poppedBalloon = balloons.find(b => b.id === data.id);
-            if (poppedBalloon && !poppedBalloon.popped) {
-              poppedBalloon.popped = true;
-              poppedBalloon.poppedByOpponent = true;
-              
-              createExplosion(poppedBalloon.x, poppedBalloon.y, "#06b6d4"); 
-              playSynthSound('popOpponent');
-              createTextParticle(poppedBalloon.x, poppedBalloon.y, `คู่แข่งเจาะ!`, "#06b6d4", false);
+          case "ready":
+            opponentInputReady = true;
+            if (localInputReady) {
+              triggerCountdown();
             }
-          }
-          break;
+            break;
 
-        case "score":
-          opponentScore = data.score;
-          opponentCombo = data.combo;
-          if (opponentCombo > opponentMaxCombo) {
-            opponentMaxCombo = opponentCombo;
-          }
-          
-          const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
-          if (opponentScoreDisplayEl) {
-            if (opponentScore < 0) {
-              opponentScoreDisplayEl.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
-            } else {
-              opponentScoreDisplayEl.innerText = opponentScore.toString().padStart(3, '0');
+          case "pointer":
+            opponentTargetPointer.x = data.x;
+            opponentTargetPointer.y = data.y;
+            if (!opponentPointer.active && data.active) {
+              opponentPointer.x = data.x;
+              opponentPointer.y = data.y;
             }
-          }
-          
-          const opponentHudComboEl = document.getElementById("opponentHudCombo");
-          if (opponentHudComboEl) {
-            if (opponentCombo >= 3) {
-              opponentHudComboEl.innerText = `COMBO x${opponentCombo}`;
-              opponentHudComboEl.classList.remove("hidden");
-            } else {
-              opponentHudComboEl.classList.add("hidden");
+            opponentPointer.active = data.active;
+            break;
+
+          case "pop":
+            // Only relevant in "share" mode
+            if (matchMode === "share") {
+              const poppedBalloon = balloons.find(b => b.id === data.id);
+              if (poppedBalloon && !poppedBalloon.popped) {
+                poppedBalloon.popped = true;
+                poppedBalloon.poppedByOpponent = true;
+                
+                createExplosion(poppedBalloon.x, poppedBalloon.y, "#06b6d4"); 
+                playSynthSound('popOpponent');
+                createTextParticle(poppedBalloon.x, poppedBalloon.y, `คู่แข่งเจาะ!`, "#06b6d4", false);
+              }
             }
-          }
-          break;
+            break;
 
-        case "restart":
-          randomSeed = data.seed;
-          startGameplay();
-          showTemporaryToast("หัวหน้าห้องสั่งเริ่มเกมรอบใหม่!");
-          break;
+          case "score":
+            opponentScore = data.score;
+            opponentCombo = data.combo;
+            if (opponentCombo > opponentMaxCombo) {
+              opponentMaxCombo = opponentCombo;
+            }
+            
+            const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
+            if (opponentScoreDisplayEl) {
+              if (opponentScore < 0) {
+                opponentScoreDisplayEl.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
+              } else {
+                opponentScoreDisplayEl.innerText = opponentScore.toString().padStart(3, '0');
+              }
+            }
+            
+            const opponentHudComboEl = document.getElementById("opponentHudCombo");
+            if (opponentHudComboEl) {
+              if (opponentCombo >= 3) {
+                opponentHudComboEl.innerText = `COMBO x${opponentCombo}`;
+                opponentHudComboEl.classList.remove("hidden");
+              } else {
+                opponentHudComboEl.classList.add("hidden");
+              }
+            }
+            break;
 
-        case "disconnect":
-          handleOpponentDisconnect();
-          break;
+          case "restart":
+            randomSeed = data.seed;
+            startGameplay();
+            showTemporaryToast("หัวหน้าห้องสั่งเริ่มเกมรอบใหม่!");
+            break;
 
-        case "exit-to-lobby":
-          exitToLobby();
-          showTemporaryToast("คู่แข่งได้กดออกจากเกมกลับสู่ห้องล็อบบี้");
-          break;
+          case "disconnect":
+            handleOpponentDisconnect();
+            break;
+
+          case "exit-to-lobby":
+            exitToLobby();
+            showTemporaryToast("คู่แข่งได้กดออกจากเกมกลับสู่ห้องล็อบบี้");
+            break;
+        }
+      } catch (err) {
+        console.error("[Network Error] Failed to process data message:", err);
+        alert("ตรวจพบข้อผิดพลาดระบบเครือข่าย:\n" + err.name + ": " + err.message + "\n\nStack Trace:\n" + err.stack);
       }
-    } catch (err) {
-      console.error("[Network Error] Failed to process data message:", err);
-      alert("ตรวจพบข้อผิดพลาดระบบเครือข่าย:\n" + err.name + ": " + err.message + "\n\nStack Trace:\n" + err.stack);
-    }
-  });
+    });
 
-  networkConnection.on("close", () => {
-    handleOpponentDisconnect();
-  });
+    networkConnection.on("close", () => {
+      handleOpponentDisconnect();
+    });
+  } catch (err) {
+    console.error("Error in setupConnectionListeners:", err);
+    alert("Error in setupConnectionListeners:\n" + err.message + "\n" + err.stack);
+  }
 }
 
 function handleOpponentDisconnect() {
