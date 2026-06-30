@@ -180,14 +180,14 @@ function updateGameUI() {
 }
 
 // Switch control mode
-function switchPlayMode(mode) {
+async function switchPlayMode(mode) {
   gameMode = mode;
   if (mode === "ai") {
     modeAiBtn.className = "px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-indigo-600 text-white shadow-md";
     modeTouchBtn.className = "px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200";
     
     // Initialize AI & Webcam
-    return initCameraAndAI();
+    await initCameraAndAI();
   } else {
     modeTouchBtn.className = "px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-indigo-600 text-white shadow-md";
     modeAiBtn.className = "px-2.5 py-1.5 rounded-xl text-xs font-bold transition duration-200 flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200";
@@ -200,7 +200,6 @@ function switchPlayMode(mode) {
     }
     cameraStatus.className = "flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-500";
     cameraStatus.innerHTML = `<i class="fa-solid fa-hand"></i> <span>โหมดสัมผัสหน้าจอ</span>`;
-    return Promise.resolve();
   }
 }
 
