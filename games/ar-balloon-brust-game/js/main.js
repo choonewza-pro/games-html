@@ -637,6 +637,7 @@ submitJoinRoomBtn.addEventListener("click", () => {
     // Connect to the host using the prefixed room code
     networkConnection = peerInstance.connect('AR-BALLOON-' + targetId);
     myPlayerRole = "guest";
+    roomId = targetId;
 
     networkConnection.on("open", () => {
       try {
