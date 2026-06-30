@@ -2,12 +2,41 @@
 // INFRASTRUCTURE: PEERJS P2P NETWORK SERVICE
 // ==========================================
 
+let lastOpponentHeartbeatTime = 0;
+let heartbeatInterval = null;
+
 // Set up WebRTC DataChannel Listeners
 function setupConnectionListeners() {
   if (!networkConnection) return;
 
+  // Initialize heartbeat state
+  lastOpponentHeartbeatTime = Date.now();
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  
+  heartbeatInterval = setInterval(() => {
+    if (networkConnection && networkConnection.open) {
+      try {
+        networkConnection.send({ type: "ping" });
+      } catch (e) {
+        console.warn("Heartbeat send failed:", e);
+      }
+      
+      // Check for timeout (6 seconds of no messages)
+      if (Date.now() - lastOpponentHeartbeatTime > 6000) {
+        console.warn("Heartbeat timeout. Opponent disconnected.");
+        handleOpponentDisconnect();
+      }
+    }
+  }, 2000);
+
   networkConnection.on("data", (data) => {
+    // Update heartbeat timestamp on any message received
+    lastOpponentHeartbeatTime = Date.now();
+
     switch (data.type) {
+      case "ping":
+        // Heartbeat ping received, just update the timestamp (already done above)
+        break;
       case "init":
         GAME_TITLE = data.settings.title;
         GAME_MISSION = data.settings.mission;
@@ -45,6 +74,7 @@ function setupConnectionListeners() {
       case "pre_start":
         randomSeed = data.seed;
         matchMode = data.matchMode || "share";
+        gameMode = data.gameMode || "ai";
         isMultiplayer = true;
         
         const myScoreLabelEl = document.getElementById("myScoreLabel");
@@ -160,6 +190,12 @@ function handleOpponentDisconnect() {
     document.exitFullscreen().catch(() => {});
   }
 
+  // Clear heartbeat interval
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
+
   leaveCurrentRoom();
 
   // Ensure we go back to the very first main menu
@@ -211,6 +247,12 @@ function leaveCurrentRoom() {
   if (peerInstance) {
     peerInstance.destroy();
     peerInstance = null;
+  }
+
+  // Clear heartbeat interval
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
   }
 
   isMultiplayer = false;

@@ -690,7 +690,8 @@ startMultiplayerGameBtn.addEventListener("click", () => {
     networkConnection.send({
       type: "pre_start",
       seed: randomSeed,
-      matchMode: matchMode
+      matchMode: matchMode,
+      gameMode: gameMode
     });
 
     // Request fullscreen on user gesture

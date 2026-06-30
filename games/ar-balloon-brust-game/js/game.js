@@ -12,41 +12,51 @@ function seededRandom() {
 
 function triggerCountdown() {
   // Hide all loading and pre-start overlays
-  loadingOverlay.classList.add("hidden");
-  document.getElementById("guestPreStartOverlay").classList.add("hidden");
-  startScreenOverlay.classList.add("hidden");
+  const loadingOverlayEl = document.getElementById("loadingOverlay");
+  if (loadingOverlayEl) loadingOverlayEl.classList.add("hidden");
+  
+  const guestPreStartOverlayEl = document.getElementById("guestPreStartOverlay");
+  if (guestPreStartOverlayEl) guestPreStartOverlayEl.classList.add("hidden");
+  
+  const startScreenOverlayEl = document.getElementById("startScreenOverlay");
+  if (startScreenOverlayEl) startScreenOverlayEl.classList.add("hidden");
 
   // Show countdown overlay
   const countdownOverlay = document.getElementById("countdownOverlay");
   const countdownNumber = document.getElementById("countdownNumber");
-  countdownOverlay.classList.remove("hidden");
+  if (countdownOverlay) countdownOverlay.classList.remove("hidden");
 
-  let count = 3;
-  countdownNumber.innerText = count;
-  countdownNumber.className = "text-8xl md:text-9xl font-black text-amber-400 font-sans select-none countdown-pulse";
-  playSynthSound('countdownBeep');
+  if (countdownNumber) {
+    let count = 3;
+    countdownNumber.innerText = count;
+    countdownNumber.className = "text-8xl md:text-9xl font-black text-amber-400 font-sans select-none countdown-pulse";
+    playSynthSound('countdownBeep');
 
-  const interval = setInterval(() => {
-    count--;
-    if (count > 0) {
-      countdownNumber.innerText = count;
-      // Reset animation by triggering reflow
-      countdownNumber.classList.remove("countdown-pulse");
-      void countdownNumber.offsetWidth; // reflow
-      countdownNumber.classList.add("countdown-pulse");
-      playSynthSound('countdownBeep');
-    } else if (count === 0) {
-      countdownNumber.innerText = "เริ่มได้! 🎈";
-      countdownNumber.classList.remove("countdown-pulse");
-      void countdownNumber.offsetWidth; // reflow
-      countdownNumber.classList.add("countdown-pulse");
-      playSynthSound('countdownGo');
-    } else {
-      clearInterval(interval);
-      countdownOverlay.classList.add("hidden");
-      startGameplay();
-    }
-  }, 1000);
+    const interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        countdownNumber.innerText = count;
+        // Reset animation by triggering reflow
+        countdownNumber.classList.remove("countdown-pulse");
+        void countdownNumber.offsetWidth; // reflow
+        countdownNumber.classList.add("countdown-pulse");
+        playSynthSound('countdownBeep');
+      } else if (count === 0) {
+        countdownNumber.innerText = "เริ่มได้! 🎈";
+        countdownNumber.classList.remove("countdown-pulse");
+        void countdownNumber.offsetWidth; // reflow
+        countdownNumber.classList.add("countdown-pulse");
+        playSynthSound('countdownGo');
+      } else {
+        clearInterval(interval);
+        if (countdownOverlay) countdownOverlay.classList.add("hidden");
+        startGameplay();
+      }
+    }, 1000);
+  } else {
+    // Fallback if countdownNumber element is missing
+    startGameplay();
+  }
 }
 
 function startGameplay() {
@@ -69,14 +79,23 @@ function startGameplay() {
   opponentPointer = { x: -100, y: -100, active: false };
   opponentTargetPointer = { x: -100, y: -100 };
 
-  gameHud.classList.remove("hidden");
+  const gameHudEl = document.getElementById("gameHud");
+  if (gameHudEl) gameHudEl.classList.remove("hidden");
 
-  if (hudCombo) hudCombo.classList.add("hidden");
-  if (opponentHudCombo) opponentHudCombo.classList.add("hidden");
+  const hudComboEl = document.getElementById("hudCombo");
+  if (hudComboEl) hudComboEl.classList.add("hidden");
   
-  scoreDisplay.innerText = "000";
-  opponentScoreDisplay.innerText = "000";
-  timerDisplay.innerText = timeLeft;
+  const opponentHudComboEl = document.getElementById("opponentHudCombo");
+  if (opponentHudComboEl) opponentHudComboEl.classList.add("hidden");
+  
+  const scoreDisplayEl = document.getElementById("scoreDisplay");
+  if (scoreDisplayEl) scoreDisplayEl.innerText = "000";
+  
+  const opponentScoreDisplayEl = document.getElementById("opponentScoreDisplay");
+  if (opponentScoreDisplayEl) opponentScoreDisplayEl.innerText = "000";
+  
+  const timerDisplayEl = document.getElementById("timerDisplay");
+  if (timerDisplayEl) timerDisplayEl.innerText = timeLeft;
   
   balloons = [];
   particles = [];
@@ -94,7 +113,7 @@ function startGameplay() {
   gameInterval = setInterval(() => {
     if (gameActive) {
       timeLeft--;
-      timerDisplay.innerText = timeLeft;
+      if (timerDisplayEl) timerDisplayEl.innerText = timeLeft;
       playSynthSound('tick');
 
       if (timeLeft <= 0) {
@@ -504,15 +523,23 @@ function triggerScreenShake(intensity) {
 function endGameSummary() {
   gameActive = false;
   if (gameInterval) clearInterval(gameInterval);
-  if (hudCombo) hudCombo.classList.add("hidden");
-  if (opponentHudCombo) opponentHudCombo.classList.add("hidden");
   
-  gameHud.classList.add("hidden");
+  const hudComboEl = document.getElementById("hudCombo");
+  if (hudComboEl) hudComboEl.classList.add("hidden");
+  
+  const opponentHudComboEl = document.getElementById("opponentHudCombo");
+  if (opponentHudComboEl) opponentHudComboEl.classList.add("hidden");
+  
+  const gameHudEl = document.getElementById("gameHud");
+  if (gameHudEl) gameHudEl.classList.add("hidden");
   
   playSynthSound('gameover');
 
-  finalScore.innerText = score;
-  finalCombo.innerText = maxCombo;
+  const finalScoreEl = document.getElementById("finalScore");
+  if (finalScoreEl) finalScoreEl.innerText = score;
+  
+  const finalComboEl = document.getElementById("finalCombo");
+  if (finalComboEl) finalComboEl.innerText = maxCombo;
   
   let rank = "ระดับทองแดง (Bronze)";
   let badge = "🥉";
@@ -602,17 +629,28 @@ function endGameSummary() {
     }
   }
 
-  perfRating.innerText = rank;
-  perfRating.className = `text-lg font-black ${rankColor} leading-tight`;
-  badgeIcon.innerText = badge;
+  const perfRating = document.getElementById("perfRating");
+  if (perfRating) {
+    perfRating.innerText = rank;
+    perfRating.className = `text-lg font-black ${rankColor} leading-tight`;
+  }
+  
+  const badgeIcon = document.getElementById("badgeIcon");
+  if (badgeIcon) badgeIcon.innerText = badge;
 
-  poppedListCorrect.innerHTML = listPoppedCorrect.length > 0 
-    ? listPoppedCorrect.map(w => `<button onclick="speakWord('${w}')" class="bg-emerald-50 hover:bg-emerald-100 active:scale-95 transition text-emerald-800 text-xs px-2.5 py-1 rounded-lg font-semibold border border-emerald-200 flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-volume-high text-[10px]"></i> ${w}</button>`).join('')
-    : `<span class="text-xs text-slate-400 italic">ยังไม่มีคำศัพท์ที่ตอบถูก</span>`;
+  const poppedListCorrect = document.getElementById("poppedListCorrect");
+  if (poppedListCorrect) {
+    poppedListCorrect.innerHTML = listPoppedCorrect.length > 0 
+      ? listPoppedCorrect.map(w => `<button onclick="speakWord('${w}')" class="bg-emerald-50 hover:bg-emerald-100 active:scale-95 transition text-emerald-800 text-xs px-2.5 py-1 rounded-lg font-semibold border border-emerald-200 flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-volume-high text-[10px]"></i> ${w}</button>`).join('')
+      : `<span class="text-xs text-slate-400 italic">ยังไม่มีคำศัพท์ที่ตอบถูก</span>`;
+  }
 
-  poppedListIncorrect.innerHTML = listPoppedIncorrect.length > 0
-    ? listPoppedIncorrect.map(w => `<button onclick="speakWord('${w}')" class="bg-rose-50 hover:bg-rose-100 active:scale-95 transition text-rose-800 text-xs px-2.5 py-1 rounded-lg font-semibold border border-rose-200 flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-volume-high text-[10px]"></i> ${w}</button>`).join('')
-    : `<span class="text-xs text-emerald-600 italic font-semibold"><i class="fa-solid fa-circle-check"></i> เยี่ยมมาก! คุณไม่ได้เจาะผิดประเภทเลย</span>`;
+  const poppedListIncorrect = document.getElementById("poppedListIncorrect");
+  if (poppedListIncorrect) {
+    poppedListIncorrect.innerHTML = listPoppedIncorrect.length > 0
+      ? listPoppedIncorrect.map(w => `<button onclick="speakWord('${w}')" class="bg-rose-50 hover:bg-rose-100 active:scale-95 transition text-rose-800 text-xs px-2.5 py-1 rounded-lg font-semibold border border-rose-200 flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-volume-high text-[10px]"></i> ${w}</button>`).join('')
+      : `<span class="text-xs text-emerald-600 italic font-semibold"><i class="fa-solid fa-circle-check"></i> เยี่ยมมาก! คุณไม่ได้เจาะผิดประเภทเลย</span>`;
+  }
 
   // Dynamically update exit button text based on mode
   const exitGameBtn = document.getElementById("exitGameBtn");
@@ -624,5 +662,6 @@ function endGameSummary() {
     }
   }
 
-  gameOverModal.classList.remove("hidden");
+  const gameOverModal = document.getElementById("gameOverModal");
+  if (gameOverModal) gameOverModal.classList.remove("hidden");
 }
