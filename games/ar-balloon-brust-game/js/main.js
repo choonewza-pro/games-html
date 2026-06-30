@@ -505,12 +505,20 @@ document.getElementById("guestConfirmStartBtn").addEventListener("click", () => 
     networkConnection.send({ type: "ready" });
     if (opponentInputReady) {
       triggerCountdown();
+    } else {
+      // Keep loading overlay and show waiting message
+      loadingOverlay.classList.remove("hidden");
+      document.querySelector("#loadingOverlay h3").innerText = "กำลังรอหัวหน้าห้องพร้อมและเข้าสู่การแข่งขัน...";
     }
   }).catch(() => {
     localInputReady = true;
     networkConnection.send({ type: "ready" });
     if (opponentInputReady) {
       triggerCountdown();
+    } else {
+      // Keep loading overlay and show waiting message
+      loadingOverlay.classList.remove("hidden");
+      document.querySelector("#loadingOverlay h3").innerText = "กำลังรอหัวหน้าห้องพร้อมและเข้าสู่การแข่งขัน...";
     }
   });
 });
@@ -692,6 +700,10 @@ startMultiplayerGameBtn.addEventListener("click", () => {
       }
       if (opponentInputReady) {
         triggerCountdown();
+      } else {
+        // Keep loading overlay and show waiting message
+        loadingOverlay.classList.remove("hidden");
+        document.querySelector("#loadingOverlay h3").innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
       }
     }).catch(() => {
       localInputReady = true;
@@ -701,6 +713,10 @@ startMultiplayerGameBtn.addEventListener("click", () => {
       }
       if (opponentInputReady) {
         triggerCountdown();
+      } else {
+        // Keep loading overlay and show waiting message
+        loadingOverlay.classList.remove("hidden");
+        document.querySelector("#loadingOverlay h3").innerText = "กำลังรอคู่แข่งพร้อมและเข้าสู่การแข่งขัน...";
       }
     });
   }
