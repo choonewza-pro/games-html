@@ -35,7 +35,12 @@
 5.  **ระบบเสียง (Sound & Speech Engine):**
     *   `Web Audio API`: ทำการสร้างและสังเคราะห์คลื่นเสียงสัญญาณเอฟเฟกต์ขึ้นสดๆ (Real-time Synthesis) เช่น เสียงจิ้มลูกโป่งแตก และเสียงสัญญาณนับถอยหลัง โดยไม่ต้องมีการดาวน์โหลดไฟล์เสียง `.mp3` ภายนอก
     *   `Web Speech API (Text-to-Speech)`: ใช้สังเคราะห์เสียงอ่านออกเสียงคำศัพท์ภาษาไทยและภาษาอังกฤษที่ผู้เล่นเจาะได้ เพื่อส่งเสริมการเรียนรู้ด้านการฟังออกเสียงที่ถูกต้อง
-6.  **ข้อมูลคำศัพท์ (Data Layer):** ฐานข้อมูลคำศัพท์วิชาการแบบถอดเปลี่ยนและแก้ไขได้อิสระผ่านไฟล์ภายนอกรูปแบบ JSON
+6.  **ระบบตอบสนองด้วยการสั่น (Haptic Feedback):**
+    *   ใช้ `Vibration API` (`navigator.vibrate`) เพื่อสร้างแรงสั่นสะเทือนตอบสนองทางกายภาพเมื่อผู้เล่นเจาะลูกโป่งแตกบนอุปกรณ์พกพา (สั่นสั้น 1 ครั้งเมื่อตอบถูก, สั่นเป็นจังหวะ 2 ครั้งเมื่อตอบผิด) เพิ่มมิติในการเล่นเกม
+7.  **ข้อมูลคำศัพท์ (Data Layer):**
+    *   ฐานข้อมูลคำศัพท์วิชาการเก็บไว้ในไฟล์ [js/data-ar-balloon-brust-game.js](./js/data-ar-balloon-brust-game.js) ในรูปแบบตัวแปร JavaScript ทั่วไป ช่วยหลีกเลี่ยงข้อจำกัดเรื่องระบบรักษาความปลอดภัยของเบราว์เซอร์ (CORS Block) ทำให้เกมสามารถเปิดเล่นและดึงคำศัพท์มาแสดงได้ทันที แม้เป็นการเปิดไฟล์ตรง ๆ แบบไม่มีเว็บเซิร์ฟเวอร์ (โปรโตคอล `file://`)
+8.  **ระบบรักษาความปลอดภัยในการแชร์ห้อง (P2P Room Identifiers):**
+    *   ระบบการตั้งรหัสห้องจับคู่จะสร้างเลขสุ่ม 4 หลักขึ้นมาให้โฮสต์แสดงผล ส่วนระบบเบื้องหลังจะใช้ชื่อห้องในฟอร์แมต `AR-BALLOON-xxxx` บนเซิร์ฟเวอร์ PeerJS สาธารณะ เพื่อหลีกเลี่ยงการเชื่อมต่อล้มเหลวหรือเกิดการสับสนพิกัดระหว่างผู้เล่นกลุ่มอื่น ๆ ในระบบเครือข่ายเดียวกัน
 
 ---
 
@@ -49,18 +54,20 @@ games/ar-balloon-brust-game/
 ├── style.css         # Styling Layer: สไตล์การเร่งกราฟิกคีย์เฟรม แอนิเมชัน และการซูมตัวเลข
 └── js/
     ├── state.js      # Domain State: จุดรวมตัวแปรสถานะทั้งหมดของเกม และพิกัดเป้าหมาย
+    ├── data-ar-balloon-brust-game.js # Data Layer: ไฟล์เก็บข้อมูลเทมเพลตคำศัพท์แบบ JS (หลีกเลี่ยง CORS)
     ├── audio.js      # Infrastructure: บริการสังเคราะห์เสียงเอฟเฟกต์ (Audio Synth) และออกเสียงคำศัพท์ (TTS)
     ├── entities.js   # Domain Entities: โมเดลคลาส Balloon, Particle, TextParticle และบ่อพักตัวแปร (Pools)
     ├── network.js    # Infrastructure: การจัดการ P2P PeerJS, การตอบรับข้อความ และตรรกะการหลุดการเชื่อมต่อ
     ├── camera.js     # Infrastructure: ตรรกะควบคุมกล้องและตัวจับตำแหน่งกระดูกนิ้ว MediaPipe Hands
     ├── game.js       # Use Cases: ลูปหลักอัปเดตตำแหน่งวาดเฟรม (Game Loop), ตรรกะตรวจสอบการชน และการนับถอยหลัง
-    └── main.js       # Interface Adapters: การเชื่อมโยงปุ่มเหตุการณ์ UI, การจัดการหน้าจอ และการโหลด JSON คำศัพท์
+    └── main.js       # Interface Adapters: การเชื่อมโยงปุ่มเหตุการณ์ UI, การจัดการหน้าจอ และการโหลดคำศัพท์จากไฟล์ข้อมูล
 ```
 
 ### รายละเอียดโครงสร้างไฟล์ภายใต้ `./` :
 *   [index.html](./index.html) - UI & DOM Layout
 *   [style.css](./style.css) - Styling Layer
 *   [js/state.js](./js/state.js) - Domain State
+*   [js/data-ar-balloon-brust-game.js](./js/data-ar-balloon-brust-game.js) - Word Database File
 *   [js/audio.js](./js/audio.js) - Audio Service
 *   [js/entities.js](./js/entities.js) - Domain Entities
 *   [js/network.js](./js/network.js) - P2P Network Service
@@ -71,12 +78,13 @@ games/ar-balloon-brust-game/
 ### ลำดับการโหลดสคริปต์ใน [index.html](./index.html):
 ```html
 <script src="js/state.js"></script>     <!-- 1. ประกาศตัวแปรทั้งหมดเพื่อสร้าง Global Scope -->
-<script src="js/audio.js"></script>     <!-- 2. โหลดระบบเสียง -->
-<script src="js/entities.js"></script>  <!-- 3. โหลดคลาสลูกโป่งและอนุภาค (ขึ้นอยู่กับ state และ audio) -->
-<script src="js/network.js"></script>   <!-- 4. โหลดระบบออนไลน์ P2P (ขึ้นอยู่กับ state และ game) -->
-<script src="js/camera.js"></script>    <!-- 5. โหลดระบบ AI กล้อง -->
-<script src="js/game.js"></script>      <!-- 6. โหลดตรรกะเกมลูปหลัก (ขึ้นอยู่กับไฟล์ก่อนหน้าทั้งหมด) -->
-<script src="js/main.js"></script>      <!-- 7. จุดเริ่มต้นระบบ ผูกปุ่มกด และเริ่มดึงข้อมูลคำศัพท์ -->
+<script src="js/data-ar-balloon-brust-game.js"></script> <!-- 2. โหลดฐานข้อมูลคำศัพท์เข้าระบบ -->
+<script src="js/audio.js"></script>     <!-- 3. โหลดระบบเสียง -->
+<script src="js/entities.js"></script>  <!-- 4. โหลดคลาสลูกโป่งและอนุภาค (ขึ้นอยู่กับ state และ audio) -->
+<script src="js/network.js"></script>   <!-- 5. โหลดระบบออนไลน์ P2P (ขึ้นอยู่กับ state และ game) -->
+<script src="js/camera.js"></script>    <!-- 6. โหลดระบบ AI กล้อง -->
+<script src="js/game.js"></script>      <!-- 7. โหลดตรรกะเกมลูปหลัก (ขึ้นอยู่กับไฟล์ก่อนหน้าทั้งหมด) -->
+<script src="js/main.js"></script>      <!-- 8. จุดเริ่มต้นระบบ ผูกปุ่มกด และเริ่มดึงข้อมูลคำศัพท์ -->
 ```
 
 ---
@@ -163,7 +171,9 @@ sequenceDiagram
 
 *   **การเพิ่มหมวดหมู่หรือชุดคำศัพท์ใหม่:** 
     *   **ไม่แนะนำ** ให้แก้ไขตัวแปร `GAME_TEMPLATES` ใน [js/state.js](./js/state.js#L5) 
-    *   **วิธีที่ถูกต้อง:** ให้เข้าไปอัปเดตไฟล์พิกัดคำศัพท์ภายนอกที่ [ar-balloon-brust-game.json](../../data/ar-balloon-brust-game.json) แทน โดยเขียนคีย์วิชาใหม่เพิ่มเข้าไป ระบบที่หน้าตั้งค่าและปุ่มสแกนใน [js/main.js](./js/main.js#L529) จะดึงข้อมูลและสร้างตัวเลือกขึ้นมาให้ผู้เล่นสลับเล่นได้ทันทีแบบอัตโนมัติ
+    *   **วิธีที่ถูกต้อง:** ให้เข้าไปอัปเดตไฟล์ชุดข้อมูลคำศัพท์หลักที่ [js/data-ar-balloon-brust-game.js](./js/data-ar-balloon-brust-game.js) โดยเขียนชุดคำศัพท์วิชาใหม่เพิ่มเข้าไปในอ็อบเจกต์ `EXTERNAL_GAME_TEMPLATES` ระบบจะดึงข้อมูลมาสร้างตัวเลือกในหน้าตั้งค่าให้ผู้เล่นสลับเล่นได้โดยอัตโนมัติทันที
+*   **การเพิ่มเอฟเฟกต์การสั่น (Vibration):**
+    *   สามารถเรียกใช้ฟังก์ชันมาตรฐาน `navigator.vibrate(milliseconds)` ภายในส่วนควบคุมเกม เช่น เมื่อเกิดการชนหรือทำคะแนน เพื่อเพิ่มการตอบรับสัมผัส (Tactile Feedback) บนอุปกรณ์พกพาที่รองรับ
 *   **การปรับปรุงการวาดภาพหรือฟิสิกส์:**
     *   หากต้องการปรับปรุงการเร่งความเร็ว, แรงสั่นสะเทือน, หรือการวาดรูปลักษณ์ลูกโป่ง ให้มุ่งไปที่คลาส `Balloon` ใน [js/entities.js](./js/entities.js#L6)
 *   **การปรับการรับส่งข้อมูลผ่านเครือข่าย:**
