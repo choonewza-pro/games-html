@@ -565,7 +565,8 @@ createRoomBtn.addEventListener("click", () => {
     // Update role status panel
     localRoleBadge.innerText = "หัวหน้าห้อง (Host)";
     localRoomIdBadge.innerText = roomId;
-    roomStatusPanel.classList.remove("hidden");
+    const roomStatusPanelEl = document.getElementById("roomStatusPanel");
+    if (roomStatusPanelEl) roomStatusPanelEl.classList.remove("hidden");
   });
 
   peerInstance.on("connection", (conn) => {
@@ -656,7 +657,8 @@ submitJoinRoomBtn.addEventListener("click", () => {
 
         localRoleBadge.innerText = "ผู้ท้าชิง (Guest)";
         localRoomIdBadge.innerText = targetId;
-        roomStatusPanel.classList.remove("hidden");
+        const roomStatusPanelEl = document.getElementById("roomStatusPanel");
+        if (roomStatusPanelEl) roomStatusPanelEl.classList.remove("hidden");
         
         setupConnectionListeners();
       } catch (err) {
