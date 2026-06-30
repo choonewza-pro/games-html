@@ -28,29 +28,42 @@
       try {
         const res = await fetch('https://api.github.com/repos/choonewza-pro/games-html/contents/games');
         if (!res.ok) throw new Error('API error');
-        const files = await res.json();
-        const htmlFiles = files.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
+        const items = await res.json();
+        
+        // Filter for HTML files (excluding index.html) and subdirectories
+        const gamesList = items.filter(item => 
+          (item.type === 'file' && item.name.endsWith('.html') && item.name !== 'index.html') ||
+          (item.type === 'dir')
+        );
 
-        if (htmlFiles.length === 0) {
+        if (gamesList.length === 0) {
           container.innerHTML = '<div class="text-center text-purple-300 text-xl">ไม่มีเกมในขณะนี้</div>';
           return;
         }
 
-        const cards = await Promise.all(htmlFiles.map(async (file) => {
-          let title = file.name.replace(/\.html$/, '').replace(/_/g, ' ');
+        const cards = await Promise.all(gamesList.map(async (item) => {
+          let title = item.name.replace(/\.html$/, '').replace(/[-_]/g, ' ');
+          let gamePath = item.path;
+          let downloadUrl = item.download_url;
+
+          if (item.type === 'dir') {
+            gamePath = `${item.path}/index.html`;
+            downloadUrl = `https://raw.githubusercontent.com/choonewza-pro/games-html/main/${item.path}/index.html`;
+          }
+
           try {
-            const fileRes = await fetch(file.download_url);
+            const fileRes = await fetch(downloadUrl);
             const text = await fileRes.text();
             const match = text.match(/<title>([^<]+)<\/title>/);
             if (match) title = match[1];
           } catch {}
 
-          const emoji = title.toLowerCase().includes('v2') ? '🎮' : '🎈';
+          const emoji = title.toLowerCase().includes('v2') || title.toLowerCase().includes('v3') ? '🎮' : '🎈';
           return `
-            <a href="${file.path}"
+            <a href="${gamePath}"
                class="block p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl hover:bg-white/20 hover:scale-[1.02] transition-all duration-300">
               <h2 class="text-2xl font-bold text-white">${emoji} ${title}</h2>
-              <p class="text-purple-200 mt-2">${file.path}</p>
+              <p class="text-purple-200 mt-2">${gamePath}</p>
             </a>
           `;
         }));
