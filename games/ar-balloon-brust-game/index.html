@@ -59,7 +59,7 @@
     <div class="w-full flex flex-col gap-4 items-center">
       
       <!-- AR Viewport Wrapper -->
-      <div id="gameContainerWrapper" class="relative w-full aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl flex items-center justify-center">
+      <div id="gameContainerWrapper" class="relative w-full h-[65vh] md:h-[75vh] min-h-[460px] md:min-h-[550px] bg-slate-900 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl flex items-center justify-center">
         
         <!-- Game Metrics HUD Overlay -->
         <div id="gameHud" class="hidden absolute top-4 left-4 right-4 flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 px-4 rounded-2xl border-2 border-sky-100 shadow-lg z-10 pointer-events-auto">
@@ -122,8 +122,8 @@
         </button>
 
         <!-- Pre-Game / Welcome Overlays (Lobby system v3) -->
-        <div id="startScreenOverlay" class="absolute inset-0 bg-gradient-to-b from-sky-400/90 via-sky-500/90 to-indigo-600/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-25">
-          <div class="max-w-md w-full flex flex-col items-center">
+        <div id="startScreenOverlay" class="absolute inset-0 bg-gradient-to-b from-sky-400/90 via-sky-500/90 to-indigo-600/90 backdrop-blur-sm flex flex-col items-center p-4 md:p-6 text-center text-white z-25 overflow-y-auto">
+          <div class="max-w-md w-full flex flex-col items-center my-auto">
             <!-- Title Graphic -->
             <div class="relative mb-6">
               <span class="absolute -top-6 -left-6 text-4xl animate-bounce">🎈</span>
@@ -264,7 +264,7 @@
             </div>
 
             <p class="text-[10px] text-sky-200/80">รองรับคอมพิวเตอร์ แท็บเล็ต โทรศัพท์มือถือ และกระดานอัจฉริยะ (Interactive Whiteboard)</p>
-            <p id="build-version" class="text-[9px] text-sky-300/40 font-mono mt-1">Build: v1.0.47-20260630 (0c655eb)</p>
+            <p id="build-version" class="text-[9px] text-sky-300/40 font-mono mt-1">Build: v1.0.48-20260630 (0231c37)</p>
           </div>
         </div>
 
@@ -278,8 +278,8 @@
         </div>
 
         <!-- Guest Pre-Start Confirmation Modal -->
-        <div id="guestPreStartOverlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center z-26">
-          <div class="max-w-sm bg-white/10 p-6 rounded-3xl border border-white/20 shadow-2xl">
+        <div id="guestPreStartOverlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center p-4 md:p-6 text-white text-center z-26 overflow-y-auto">
+          <div class="max-w-sm bg-white/10 p-6 rounded-3xl border border-white/20 shadow-2xl my-auto">
             <span class="text-5xl mb-4 block animate-bounce">🎮</span>
             <h3 class="text-xl font-black text-amber-300">ผู้สร้างห้องกำลังเริ่มเกม!</h3>
             <p class="text-xs text-slate-200 mt-2 mb-6">กรุณากดปุ่มด้านล่างเพื่ออนุญาตการแสดงผลเต็มจอ เตรียมกล้อง และเข้าสู่การแข่งขัน</p>
@@ -295,7 +295,7 @@
         </div>
 
         <!-- Game Over Screen / Summary Scoreboard (Moved inside wrapper for fullscreen visibility) -->
-        <div id="gameOverModal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col justify-center items-center p-4 z-40 overflow-y-auto">
+        <div id="gameOverModal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center p-4 z-40 overflow-y-auto">
           <div class="bg-white max-w-xl w-full rounded-3xl border-8 border-sky-400 p-6 shadow-2xl relative text-center my-auto">
             
             <!-- Crown / Mascot Award Icon -->
@@ -554,13 +554,13 @@
   </div>
 
   <!-- Game Scripts in Clean Architecture Modules -->
-  <script src="js/state.js?v=47"></script>
-  <script src="js/data-ar-balloon-brust-game.js?v=47"></script>
-  <script src="js/audio.js?v=47"></script>
-  <script src="js/entities.js?v=47"></script>
-  <script src="js/network.js?v=47"></script>
-  <script src="js/camera.js?v=47"></script>
-  <script src="js/game.js?v=47"></script>
-  <script src="js/main.js?v=47"></script>
+  <script src="js/state.js?v=48"></script>
+  <script src="js/data-ar-balloon-brust-game.js?v=48"></script>
+  <script src="js/audio.js?v=48"></script>
+  <script src="js/entities.js?v=48"></script>
+  <script src="js/network.js?v=48"></script>
+  <script src="js/camera.js?v=48"></script>
+  <script src="js/game.js?v=48"></script>
+  <script src="js/main.js?v=48"></script>
 </body>
 </html>
