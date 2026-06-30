@@ -500,7 +500,33 @@ function endGameSummary() {
   let badge = "🥉";
   let rankColor = "text-amber-700";
   
+  const mpScoreboard = document.getElementById("multiplayerScoreboard");
+  
   if (isMultiplayer) {
+    // Show VS Scoreboard and populate data
+    if (mpScoreboard) {
+      mpScoreboard.classList.remove("hidden");
+      const mpPlayerScore = document.getElementById("mpPlayerScore");
+      const mpOpponentScore = document.getElementById("mpOpponentScore");
+      
+      if (mpPlayerScore && mpOpponentScore) {
+        mpPlayerScore.innerText = score;
+        mpOpponentScore.innerText = opponentScore;
+        
+        // Color coding: green for winner, red for loser, blue for tie
+        if (score > opponentScore) {
+          mpPlayerScore.className = "text-4xl font-black text-emerald-600 animate-pulse";
+          mpOpponentScore.className = "text-4xl font-black text-rose-400";
+        } else if (score < opponentScore) {
+          mpPlayerScore.className = "text-4xl font-black text-rose-400";
+          mpOpponentScore.className = "text-4xl font-black text-emerald-600 animate-pulse";
+        } else {
+          mpPlayerScore.className = "text-4xl font-black text-indigo-500";
+          mpOpponentScore.className = "text-4xl font-black text-indigo-500";
+        }
+      }
+    }
+
     if (score > opponentScore) {
       rank = "ชนะการแข่งขัน! 🏆";
       badge = "👑";
@@ -515,6 +541,11 @@ function endGameSummary() {
       rankColor = "text-indigo-500";
     }
   } else {
+    // Hide VS Scoreboard for singleplayer
+    if (mpScoreboard) {
+      mpScoreboard.classList.add("hidden");
+    }
+
     if (score >= 120) {
       rank = "อัจฉริยะภาษาไทย! (Diamond)";
       badge = "💎";
