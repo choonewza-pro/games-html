@@ -94,7 +94,12 @@ function setupConnectionListeners() {
         if (opponentCombo > opponentMaxCombo) {
           opponentMaxCombo = opponentCombo;
         }
-        opponentScoreDisplay.innerText = opponentScore.toString().padStart(3, '0');
+        
+        if (opponentScore < 0) {
+          opponentScoreDisplay.innerText = "-" + Math.abs(opponentScore).toString().padStart(3, '0');
+        } else {
+          opponentScoreDisplay.innerText = opponentScore.toString().padStart(3, '0');
+        }
         
         if (opponentCombo >= 3) {
           opponentHudCombo.innerText = `COMBO x${opponentCombo}`;

@@ -268,7 +268,7 @@ function gameLoop(timestamp) {
         if (!listPoppedCorrect.includes(b.word)) listPoppedCorrect.push(b.word);
       } else {
         comboCount = 0;
-        score = Math.max(0, score - 5);
+        score -= 5; // Allow negative scores
         playSynthSound('popIncorrect');
         if ('vibrate' in navigator) {
           navigator.vibrate([100, 50, 100]); // Error vibration pattern
@@ -281,7 +281,11 @@ function gameLoop(timestamp) {
         if (!listPoppedIncorrect.includes(b.word)) listPoppedIncorrect.push(b.word);
       }
       
-      scoreDisplay.innerText = score.toString().padStart(3, '0');
+      if (score < 0) {
+        scoreDisplay.innerText = "-" + Math.abs(score).toString().padStart(3, '0');
+      } else {
+        scoreDisplay.innerText = score.toString().padStart(3, '0');
+      }
       updateComboHUD();
 
       // Sync POP and Score (POP is only sent in "share" mode)
