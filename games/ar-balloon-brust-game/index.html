@@ -308,6 +308,58 @@
           <div id="countdownNumber" class="text-8xl md:text-9xl font-black text-amber-400 font-sans select-none">3</div>
         </div>
 
+        <!-- Game Over Screen / Summary Scoreboard (Moved inside wrapper for fullscreen visibility) -->
+        <div id="gameOverModal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col justify-center items-center p-4 z-40 overflow-y-auto">
+          <div class="bg-white max-w-xl w-full rounded-3xl border-8 border-sky-400 p-6 shadow-2xl relative text-center my-auto">
+            
+            <!-- Crown / Mascot Award Icon -->
+            <div class="w-20 h-20 mx-auto -mt-14 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full border-4 border-white flex items-center justify-center shadow-xl animate-bounce">
+              <span id="badgeIcon" class="text-3xl">🏆</span>
+            </div>
+
+            <h2 class="text-2xl font-black text-slate-800 mt-2">หมดเวลาแล้วจ้า! 🎉</h2>
+            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">สรุปผลการประเมินทักษะของคุณ</p>
+
+            <!-- Score & Statistics Grid -->
+            <div class="grid grid-cols-3 gap-2.5 my-4">
+              <div class="bg-sky-50 p-2.5 rounded-2xl border border-sky-100">
+                <span class="text-[9px] text-slate-400 font-bold block uppercase mb-0.5">คะแนนที่ทำได้</span>
+                <span id="finalScore" class="text-2xl font-black text-sky-600">0</span>
+              </div>
+              <div class="bg-rose-50 p-2.5 rounded-2xl border border-rose-100">
+                <span class="text-[9px] text-slate-400 font-bold block uppercase mb-0.5">คอมโบสูงสุด</span>
+                <span id="finalCombo" class="text-2xl font-black text-rose-600">0</span>
+              </div>
+              <div class="bg-amber-50 p-2.5 rounded-2xl border border-amber-100">
+                <span class="text-[9px] text-slate-400 font-bold block uppercase mb-0.5">ระดับความสามารถ</span>
+                <span id="perfRating" class="text-xs font-black text-amber-600 leading-tight">ระดับทอง</span>
+              </div>
+            </div>
+
+            <!-- Quick Analysis Breakdown of popped words to review -->
+            <div class="text-left mb-4 bg-slate-50 p-3 rounded-2xl max-h-32 overflow-y-auto border border-slate-100">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">คำศัพท์ที่คุณวินิจฉัยและเจาะถูกต้อง:</h4>
+              <div id="poppedListCorrect" class="flex flex-wrap gap-1 mb-2">
+                <span class="text-xs text-slate-400 italic">ไม่มีบันทึก</span>
+              </div>
+
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">คำศัพท์ที่คุณวิเคราะห์พลาดหรือเจาะผิด:</h4>
+              <div id="poppedListIncorrect" class="flex flex-wrap gap-1">
+                <span class="text-xs text-slate-400 italic">ไม่มีบันทึก</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2">
+              <button id="retryGameBtn" class="flex-grow py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base rounded-xl shadow-md transition transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-arrows-rotate mr-1.5"></i> เล่นใหม่อีกครั้ง
+              </button>
+              <button id="exitGameBtn" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-sm">
+                กลับหน้าหลัก
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Pause Overlay -->
         <div id="gamePausedOverlay" class="hidden absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white z-20 text-center">
           <i class="fa-solid fa-pause text-5xl mb-3 text-sky-400 animate-pulse"></i>
@@ -464,57 +516,7 @@
     </div>
   </div>
 
-  <!-- Game Over Screen / Summary Scoreboard -->
-  <div id="gameOverModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div class="bg-white max-w-xl w-full rounded-3xl border-8 border-sky-400 p-6 shadow-2xl relative text-center">
-      
-      <!-- Crown / Mascot Award Icon -->
-      <div class="w-24 h-24 mx-auto -mt-16 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full border-4 border-white flex items-center justify-center shadow-xl animate-bounce">
-        <span id="badgeIcon" class="text-4xl">🏆</span>
-      </div>
 
-      <h2 class="text-3xl font-black text-slate-800 mt-4">หมดเวลาแล้วจ้า! 🎉</h2>
-      <p class="text-sm text-slate-400 font-semibold uppercase tracking-wider mt-1">สรุปผลการประเมินทักษะของคุณ</p>
-
-      <!-- Score & Statistics Grid -->
-      <div class="grid grid-cols-3 gap-3 my-6">
-        <div class="bg-sky-50 p-3 rounded-2xl border border-sky-100">
-          <span class="text-[10px] text-slate-400 font-bold block uppercase mb-1">คะแนนที่ทำได้</span>
-          <span id="finalScore" class="text-3xl font-black text-sky-600">0</span>
-        </div>
-        <div class="bg-rose-50 p-3 rounded-2xl border border-rose-100">
-          <span class="text-[10px] text-slate-400 font-bold block uppercase mb-1">คอมโบสูงสุด</span>
-          <span id="finalCombo" class="text-3xl font-black text-rose-600">0</span>
-        </div>
-        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100">
-          <span class="text-[10px] text-slate-400 font-bold block uppercase mb-1">ระดับความสามารถ</span>
-          <span id="perfRating" class="text-base font-black text-amber-600 leading-tight">ระดับทอง</span>
-        </div>
-      </div>
-
-      <!-- Quick Analysis Breakdown of popped words to review -->
-      <div class="text-left mb-6 bg-slate-50 p-4 rounded-2xl max-h-40 overflow-y-auto border border-slate-100">
-        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">คำศัพท์ที่คุณวินิจฉัยและเจาะถูกต้อง:</h4>
-        <div id="poppedListCorrect" class="flex flex-wrap gap-1.5 mb-3">
-          <span class="text-xs text-slate-400 italic">ไม่มีบันทึก</span>
-        </div>
-
-        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">คำศัพท์ที่คุณวิเคราะห์พลาดหรือเจาะผิด:</h4>
-        <div id="poppedListIncorrect" class="flex flex-wrap gap-1.5">
-          <span class="text-xs text-slate-400 italic">ไม่มีบันทึก</span>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button id="retryGameBtn" class="flex-grow py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg rounded-2xl shadow-md transition transform hover:-translate-y-0.5">
-          <i class="fa-solid fa-arrows-rotate mr-2"></i> เล่นใหม่อีกครั้ง
-        </button>
-        <button id="exitGameBtn" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition">
-          กลับหน้าหลัก
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Footer Info -->
   <footer class="w-full text-center py-4 text-[11px] text-sky-500 border-t border-sky-100/50 bg-white/50">
